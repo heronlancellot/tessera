@@ -80,18 +80,6 @@ CREATE POLICY endpoints_select_active ON endpoints
   FOR SELECT USING (is_active = TRUE);
 
 -- ============================================
--- SEED: Example publishers
--- ============================================
-INSERT INTO publishers (name, slug, website) VALUES
-  ('OpenAI', 'openai', 'https://openai.com'),
-  ('Anthropic', 'anthropic', 'https://anthropic.com');
-
-INSERT INTO endpoints (publisher_id, path, method, name, price_usd) VALUES
-  ((SELECT id FROM publishers WHERE slug = 'openai'), '/v1/chat/completions', 'POST', 'Chat Completions', 0.002),
-  ((SELECT id FROM publishers WHERE slug = 'openai'), '/v1/embeddings', 'POST', 'Embeddings', 0.0001),
-  ((SELECT id FROM publishers WHERE slug = 'anthropic'), '/v1/messages', 'POST', 'Messages', 0.003);
-
--- ============================================
 -- VERIFY
 -- ============================================
 DO $$

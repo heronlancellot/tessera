@@ -11,6 +11,7 @@
     "db:start": "npx supabase start",
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",
+    "db:seed": "npx supabase db reset && psql -h localhost -p 54322 -U postgres -d postgres -f supabase/seed.sql",
     "db:new": "npx supabase migration new",
     "db:types": "npx supabase gen types typescript --local > src/db/types.ts"
   },
