@@ -1,3 +1,5 @@
+"use server";
+
 import { settlePayment, facilitator } from "thirdweb/x402";
 import { createThirdwebClient } from "thirdweb";
 import { avalancheFuji } from "thirdweb/chains";
