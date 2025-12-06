@@ -1,116 +1,100 @@
--- Tessera Migration 002: Publishers & Revenue Splits
--- Opt-in partners with x402 endpoints and royalty distribution
+-- Tessera Migration 002: Publishers & Endpoints
+-- Providers and their monetized API routes
 
 -- ============================================
 -- PUBLISHERS TABLE
--- Opt-in partners with x402 endpoints
+-- API providers (OpenAI, Anthropic, etc)
 -- ============================================
 CREATE TABLE publishers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
   -- Identity
   name TEXT NOT NULL,
-  domain TEXT NOT NULL UNIQUE,
+  slug TEXT NOT NULL UNIQUE,
   logo_url TEXT,
-
-  -- x402 Integration
-  x402_endpoint TEXT NOT NULL,
-
-  -- Payout (wallet opcional - se NULL, Tessera guarda e paga depois)
-  wallet_address TEXT,
-
-  -- Default Pricing (can be overridden per article)
-  default_price_usd DECIMAL(10, 4) NOT NULL DEFAULT 0.25,
+  website TEXT,
 
   -- Status
   is_active BOOLEAN DEFAULT TRUE,
-  verified_at TIMESTAMPTZ,
-
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_publishers_domain ON publishers(domain);
+CREATE INDEX idx_publishers_slug ON publishers(slug);
 CREATE INDEX idx_publishers_active ON publishers(is_active) WHERE is_active = TRUE;
 
 CREATE TRIGGER publishers_updated_at
   BEFORE UPDATE ON publishers
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-COMMENT ON TABLE publishers IS 'Opt-in partners exposing x402 endpoints';
-COMMENT ON COLUMN publishers.x402_endpoint IS 'Publisher endpoint that accepts x402 payments';
+COMMENT ON TABLE publishers IS 'API providers (OpenAI, Anthropic, etc)';
 
 -- ============================================
--- REVENUE_SPLITS TABLE
--- Royalty distribution (like NFTs)
+-- ENDPOINTS TABLE
+-- Individual monetized routes per publisher
 -- ============================================
-CREATE TYPE split_recipient_type AS ENUM ('publisher', 'author', 'affiliate', 'platform', 'custom');
-
-CREATE TABLE revenue_splits (
+CREATE TABLE endpoints (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   publisher_id UUID NOT NULL REFERENCES publishers(id) ON DELETE CASCADE,
 
-  -- Recipient
-  recipient_type split_recipient_type NOT NULL,
-  recipient_wallet TEXT NOT NULL,
-  recipient_name TEXT,
+  -- Route info
+  path TEXT NOT NULL,
+  method TEXT NOT NULL DEFAULT 'POST',
+  name TEXT NOT NULL,
+  description TEXT,
 
-  -- Share (must sum to 1.0 per publisher/article)
-  share_percent DECIMAL(5, 4) NOT NULL CHECK (share_percent > 0 AND share_percent <= 1),
-
-  -- Scope (NULL = applies to all articles from this publisher)
-  article_url TEXT,
+  -- x402 pricing
+  price_usd DECIMAL(10, 6) NOT NULL,
+  x402_resource TEXT,
 
   -- Status
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(publisher_id, path, method)
 );
 
-CREATE INDEX idx_revenue_splits_publisher ON revenue_splits(publisher_id);
-CREATE INDEX idx_revenue_splits_article ON revenue_splits(article_url) WHERE article_url IS NOT NULL;
-CREATE INDEX idx_revenue_splits_wallet ON revenue_splits(recipient_wallet);
+CREATE INDEX idx_endpoints_publisher ON endpoints(publisher_id);
+CREATE INDEX idx_endpoints_active ON endpoints(is_active) WHERE is_active = TRUE;
 
-COMMENT ON TABLE revenue_splits IS 'Revenue distribution rules (royalties)';
-COMMENT ON COLUMN revenue_splits.share_percent IS '0.25 = 25% of payment';
-COMMENT ON COLUMN revenue_splits.article_url IS 'NULL = default split for all publisher articles';
+CREATE TRIGGER endpoints_updated_at
+  BEFORE UPDATE ON endpoints
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+COMMENT ON TABLE endpoints IS 'Monetized API routes per publisher';
+COMMENT ON COLUMN endpoints.price_usd IS 'Price per request in USD';
+COMMENT ON COLUMN endpoints.x402_resource IS 'x402 payment resource identifier';
 
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
 ALTER TABLE publishers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE revenue_splits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE endpoints ENABLE ROW LEVEL SECURITY;
 
--- Publishers: public read (active only), admin write
+-- Public read for active publishers/endpoints
 CREATE POLICY publishers_select_active ON publishers
   FOR SELECT USING (is_active = TRUE);
 
--- Revenue splits: public read, admin write
-CREATE POLICY revenue_splits_select_all ON revenue_splits
+CREATE POLICY endpoints_select_active ON endpoints
   FOR SELECT USING (is_active = TRUE);
 
 -- ============================================
--- SEED: Tessera platform fee (always 5%)
--- This ensures Tessera always gets a cut
+-- SEED: Example publishers
 -- ============================================
--- Note: Run this manually after creating a publisher
--- INSERT INTO revenue_splits (publisher_id, recipient_type, recipient_wallet, recipient_name, share_percent)
--- VALUES ('<publisher_id>', 'platform', '0xTesseraWallet', 'Tessera Platform Fee', 0.05);
+INSERT INTO publishers (name, slug, website) VALUES
+  ('OpenAI', 'openai', 'https://openai.com'),
+  ('Anthropic', 'anthropic', 'https://anthropic.com');
+
+INSERT INTO endpoints (publisher_id, path, method, name, price_usd) VALUES
+  ((SELECT id FROM publishers WHERE slug = 'openai'), '/v1/chat/completions', 'POST', 'Chat Completions', 0.002),
+  ((SELECT id FROM publishers WHERE slug = 'openai'), '/v1/embeddings', 'POST', 'Embeddings', 0.0001),
+  ((SELECT id FROM publishers WHERE slug = 'anthropic'), '/v1/messages', 'POST', 'Messages', 0.003);
 
 -- ============================================
--- VERIFY MIGRATION
+-- VERIFY
 -- ============================================
 DO $$
-DECLARE
-  table_count INTEGER;
 BEGIN
-  SELECT COUNT(*) INTO table_count
-  FROM information_schema.tables
-  WHERE table_schema = 'public'
-  AND table_name IN ('publishers', 'revenue_splits');
-
-  IF table_count = 2 THEN
-    RAISE NOTICE '✅ Migration 002 successful! Publisher tables created (publishers, revenue_splits)';
-  ELSE
-    RAISE WARNING '⚠️ Migration 002 incomplete. Expected 2 tables, found %', table_count;
-  END IF;
+  RAISE NOTICE '✅ Migration 002: publishers & endpoints created';
 END $$;

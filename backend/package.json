@@ -8,11 +8,11 @@
     "build": "tsc",
     "start": "node dist/index.js",
 
-    "db:start": "supabase start",
-    "db:stop": "supabase stop",
-    "db:reset": "supabase db reset",
-    "db:new": "supabase migration new",
-    "db:types": "supabase gen types typescript --local > src/db/types.ts"
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:reset": "npx supabase db reset",
+    "db:new": "npx supabase migration new",
+    "db:types": "npx supabase gen types typescript --local > src/db/types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",

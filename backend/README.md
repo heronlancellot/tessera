@@ -46,10 +46,10 @@ Done! Supabase running at:
 users            - Developers (wallet required, social optional)
 api_keys         - API keys (tsr_ak_xxx)
 agents           - Registered agents with budgets
-publishers       - Opt-in publishers with x402 endpoints
-revenue_splits   - Revenue distribution (royalties)
-requests         - Payment logs
-usage_summary    - Aggregated stats for dashboard
+publishers       - API providers (OpenAI, Anthropic, etc)
+endpoints        - Monetized routes per publisher
+requests         - Payment/request logs
+usage_summary    - VIEW (aggregated stats, computed on demand)
 ```
 
 ### Create New Migration
