@@ -1,8 +1,10 @@
+import { Address } from "thirdweb";
+
 // Network Configuration
 export const AVALANCHE_FUJI_CHAIN_ID = 43113;
 
 // Token Addresses (Avalanche Fuji Testnet)
-export const USDC_FUJI_ADDRESS = "0x5425890298aed601595a70AB815c96711a31Bc65" as `0x${string}`;
+export const USDC_FUJI_ADDRESS = "0x5425890298aed601595a70AB815c96711a31Bc65" as Address;
 
 // API Configuration
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
