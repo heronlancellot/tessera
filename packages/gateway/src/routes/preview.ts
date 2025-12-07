@@ -22,8 +22,8 @@ previewRouter.get('/', async (req: Request, res: Response) => {
     // Fetch HTML from publisher
     const html = await fetchHtml(url)
 
-    // Convert to markdown
-    const markdown = htmlToMarkdown(html)
+    // Convert to markdown (pass URL for proper link resolution)
+    const markdown = htmlToMarkdown(html, url)
 
     // Get first ~500 chars as preview
     const preview = markdown.slice(0, 500) + (markdown.length > 500 ? '...' : '')

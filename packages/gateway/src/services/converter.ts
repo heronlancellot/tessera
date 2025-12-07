@@ -1,51 +1,60 @@
 /**
  * HTML to Markdown converter
  *
- * TODO: Implement Firecrawl-style conversion
- * Reference: https://github.com/firecrawl/firecrawl
+ * Uses Mozilla Readability to extract main content (removing ads, nav, etc)
+ * and Turndown to convert the clean HTML to Markdown.
  *
- * Steps:
- * 1. Use @mozilla/readability to extract main content
- * 2. Use turndown to convert HTML -> Markdown
- * 3. Clean up (remove scripts, styles, tracking, etc)
- *
- * Dependencies to add:
- * - @mozilla/readability
- * - turndown
- * - jsdom (for Readability)
+ * Based on Firecrawl's approach: https://github.com/firecrawl/firecrawl
  */
 
-export function htmlToMarkdown(html: string): string {
-  // Placeholder: basic HTML tag stripping
-  // Replace with proper implementation based on Firecrawl
+import { Readability } from '@mozilla/readability'
+import { JSDOM } from 'jsdom'
+import TurndownService from 'turndown'
 
-  let text = html
+export function htmlToMarkdown(html: string, url?: string): string {
+  try {
+    // 1. Parse HTML with JSDOM
+    const dom = new JSDOM(html, { url })
 
-  // Remove script and style tags with content
-  text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-  text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    // 2. Extract main content with Readability (removes ads, nav, footers, etc)
+    const reader = new Readability(dom.window.document)
+    const article = reader.parse()
 
-  // Remove HTML comments
-  text = text.replace(/<!--[\s\S]*?-->/g, '')
+    if (!article) {
+      // Fallback: if Readability can't parse, use the whole HTML
+      return convertHtmlToMarkdown(html)
+    }
 
-  // Remove all HTML tags
-  text = text.replace(/<[^>]+>/g, '')
+    // 3. Convert clean HTML to Markdown with Turndown
+    const markdown = convertHtmlToMarkdown(article.content)
 
-  // Decode HTML entities
-  text = text
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+    // Optional: prepend title if available
+    if (article.title) {
+      return `# ${article.title}\n\n${markdown}`
+    }
 
-  // Clean up whitespace
-  text = text
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-    .join('\n\n')
+    return markdown
+  } catch (error) {
+    console.error('Error converting HTML to Markdown:', error)
+    // Fallback to basic conversion
+    return convertHtmlToMarkdown(html)
+  }
+}
 
-  return text
+function convertHtmlToMarkdown(html: string): string {
+  const turndown = new TurndownService({
+    headingStyle: 'atx',
+    codeBlockStyle: 'fenced',
+    emDelimiter: '_',
+  })
+
+  // Configure Turndown rules
+  turndown.remove(['script', 'style', 'noscript', 'iframe'])
+
+  const markdown = turndown.turndown(html)
+
+  // Clean up excessive newlines
+  return markdown
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 }

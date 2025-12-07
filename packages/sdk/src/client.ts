@@ -1,8 +1,12 @@
+import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts'
+import { avalancheFuji } from 'viem/chains'
+import { toHex, type Hex } from 'viem'
 import type {
   TesseraConfig,
   PreviewResponse,
   FetchResponse,
-  PaymentRequirements
+  PaymentRequirements,
+  PaymentOption
 } from './types.js'
 
 const DEFAULT_BASE_URL = 'http://localhost:3001'
@@ -10,12 +14,15 @@ const DEFAULT_BASE_URL = 'http://localhost:3001'
 export class Tessera {
   private baseUrl: string
   private apiKey?: string
-  private privateKey?: string
+  private account?: PrivateKeyAccount
 
   constructor(config: TesseraConfig = {}) {
     this.baseUrl = config.baseUrl || DEFAULT_BASE_URL
     this.apiKey = config.apiKey
-    this.privateKey = config.privateKey
+
+    if (config.privateKey) {
+      this.account = privateKeyToAccount(config.privateKey as Hex)
+    }
   }
 
   /**
@@ -41,13 +48,12 @@ export class Tessera {
    * Automatically handles x402 payment flow
    */
   async fetch(url: string): Promise<FetchResponse> {
+    const fetchUrl = `${this.baseUrl}/fetch?url=${encodeURIComponent(url)}`
+
     // First request - get payment requirements
-    const initialResponse = await fetch(
-      `${this.baseUrl}/fetch?url=${encodeURIComponent(url)}`,
-      {
-        headers: this.buildHeaders()
-      }
-    )
+    const initialResponse = await fetch(fetchUrl, {
+      headers: this.buildHeaders()
+    })
 
     // If 200, content was free or already paid
     if (initialResponse.ok) {
@@ -58,22 +64,26 @@ export class Tessera {
     if (initialResponse.status === 402) {
       const requirements = (await initialResponse.json()) as PaymentRequirements
 
+      // Select first payment option (should be USDC on Fuji)
+      const paymentOption = requirements.accepts[0]
+      if (!paymentOption) {
+        throw new Error('No payment options available')
+      }
+
       // Build and sign payment
-      const paymentHeader = await this.buildPaymentHeader(requirements)
+      const paymentHeader = await this.buildPaymentHeader(paymentOption, requirements.x402Version)
 
       // Retry with payment
-      const paidResponse = await fetch(
-        `${this.baseUrl}/fetch?url=${encodeURIComponent(url)}`,
-        {
-          headers: {
-            ...this.buildHeaders(),
-            'X-PAYMENT': paymentHeader
-          }
+      const paidResponse = await fetch(fetchUrl, {
+        headers: {
+          ...this.buildHeaders(),
+          'X-PAYMENT': paymentHeader
         }
-      )
+      })
 
       if (!paidResponse.ok) {
-        throw new Error(`Fetch failed after payment: ${paidResponse.status}`)
+        const error = await paidResponse.text()
+        throw new Error(`Fetch failed after payment: ${paidResponse.status} - ${error}`)
       }
 
       return paidResponse.json() as Promise<FetchResponse>
@@ -83,38 +93,72 @@ export class Tessera {
   }
 
   /**
-   * Build payment header for x402
-   * TODO: Implement actual signing with privateKey
+   * Build payment header for x402 using EIP-3009 TransferWithAuthorization
    */
   private async buildPaymentHeader(
-    requirements: PaymentRequirements
+    paymentOption: PaymentOption,
+    x402Version: number
   ): Promise<string> {
-    if (!this.privateKey) {
-      throw new Error('Private key required for payments')
+    if (!this.account) {
+      throw new Error('Private key required for payments. Initialize Tessera with privateKey option.')
     }
 
-    const paymentOption = requirements.accepts[0]
-    if (!paymentOption) {
-      throw new Error('No payment options available')
-    }
+    // Generate random nonce (32 bytes)
+    const nonce = toHex(crypto.getRandomValues(new Uint8Array(32)))
 
-    // TODO: Sign the payment with ethers/viem
-    // For now, return a placeholder that will fail verification
-    // This needs proper implementation with:
-    // 1. Create EIP-3009 transferWithAuthorization signature
-    // 2. Build payment payload
-    // 3. Base64 encode
+    // Time window for authorization
+    const now = Math.floor(Date.now() / 1000)
+    const validAfter = BigInt(now - 86400) // 24h before
+    const validBefore = BigInt(now + paymentOption.maxTimeoutSeconds)
 
+    // Sign EIP-3009 TransferWithAuthorization
+    const signature = await this.account.signTypedData({
+      domain: {
+        name: paymentOption.extra.name,
+        version: paymentOption.extra.version,
+        chainId: avalancheFuji.id,
+        verifyingContract: paymentOption.asset as Hex
+      },
+      types: {
+        TransferWithAuthorization: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'validAfter', type: 'uint256' },
+          { name: 'validBefore', type: 'uint256' },
+          { name: 'nonce', type: 'bytes32' }
+        ]
+      },
+      primaryType: 'TransferWithAuthorization',
+      message: {
+        from: this.account.address,
+        to: paymentOption.payTo as Hex,
+        value: BigInt(paymentOption.maxAmountRequired),
+        validAfter,
+        validBefore,
+        nonce
+      }
+    })
+
+    // Build x402 payment payload
     const payload = {
-      x402Version: 1,
+      x402Version,
       scheme: paymentOption.scheme,
       network: paymentOption.network,
       payload: {
-        // EIP-3009 signature fields go here
-        signature: 'TODO_IMPLEMENT_SIGNING'
+        signature,
+        authorization: {
+          from: this.account.address,
+          to: paymentOption.payTo,
+          value: paymentOption.maxAmountRequired,
+          validAfter: validAfter.toString(),
+          validBefore: validBefore.toString(),
+          nonce
+        }
       }
     }
 
+    // Encode as base64
     return Buffer.from(JSON.stringify(payload)).toString('base64')
   }
 

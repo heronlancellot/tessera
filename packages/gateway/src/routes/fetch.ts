@@ -45,7 +45,7 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
 
     // Payment successful - fetch and return full content
     const html = await fetchHtml(url)
-    const markdown = htmlToMarkdown(html)
+    const markdown = htmlToMarkdown(html, url)
 
     res.json({
       url,

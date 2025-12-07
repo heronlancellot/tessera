@@ -12,7 +12,7 @@ const DEFAULT_PRICES: Record<string, number> = {
   'wsj.com': 0.30,
 }
 
-const FALLBACK_PRICE = 0.10
+const FALLBACK_PRICE = 0.001 // $0.001 for testing
 
 export async function getPrice(hostname: string): Promise<number> {
   // TODO: Query Supabase endpoints table

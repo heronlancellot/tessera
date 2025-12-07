@@ -3,7 +3,7 @@ export interface TesseraConfig {
   baseUrl?: string
   /** API key for authentication */
   apiKey?: string
-  /** Private key for signing x402 payments */
+  /** Private key for signing x402 payments (hex string starting with 0x) */
   privateKey?: string
 }
 
