@@ -1,6 +1,5 @@
 // Load env vars BEFORE any other imports
-import dotenv from 'dotenv'
-dotenv.config()
+import 'dotenv/config'
 
 import express from 'express'
 import { previewRouter } from './routes/preview.js'

@@ -1,25 +1,70 @@
 /**
- * Get price for a publisher/URL
- *
- * TODO: Integrate with Supabase to fetch from endpoints table
+ * Get price and endpoint info for a publisher
  */
 
-// Default prices per publisher (in USD)
-const DEFAULT_PRICES: Record<string, number> = {
-  'medium.com': 0.10,
-  'nature.com': 0.50,
-  'nytimes.com': 0.25,
-  'wsj.com': 0.30,
+import { supabase } from '../lib/supabase.js'
+
+export interface EndpointInfo {
+  id: string
+  path: string
+  price_usd: number
+  publisher: {
+    id: string
+    name: string
+    slug: string
+  }
 }
 
-const FALLBACK_PRICE = 0.001 // $0.001 for testing
+/**
+ * Get endpoint info by hostname
+ * Returns null if publisher not found (not integrated with Tessera)
+ */
+export async function getEndpointByHostname(
+  hostname: string
+): Promise<EndpointInfo | null> {
+  // Normalize hostname (remove www., port, protocol)
+  const normalizedHost = hostname
+    .replace(/^www\./, '')
+    .replace(/:\d+$/, '') // Remove port
+    .toLowerCase()
 
-export async function getPrice(hostname: string): Promise<number> {
-  // TODO: Query Supabase endpoints table
-  // For now, use hardcoded prices
+  // Query Supabase for publisher + endpoint
+  // Match by slug (exact) or website URL (contains hostname)
+  const { data, error } = await supabase
+    .from('endpoints')
+    .select(
+      `
+      id,
+      path,
+      price_usd,
+      publishers!inner(id, name, slug, website)
+    `
+    )
+    .eq('is_active', true)
+    .eq('publishers.is_active', true)
+    .or(`slug.eq.${normalizedHost},website.ilike.%${normalizedHost}%`, { referencedTable: 'publishers' })
+    .limit(1)
+    .maybeSingle()
 
-  // Normalize hostname (remove www.)
-  const normalizedHost = hostname.replace(/^www\./, '')
+  if (error || !data) {
+    console.log(`Publisher not found for hostname: ${normalizedHost}`)
+    return null
+  }
 
-  return DEFAULT_PRICES[normalizedHost] ?? FALLBACK_PRICE
+  // Transform the response to match EndpointInfo type
+  return {
+    id: data.id,
+    path: data.path,
+    price_usd: data.price_usd,
+    publisher: Array.isArray(data.publishers) ? data.publishers[0] : data.publishers
+  } as EndpointInfo
+}
+
+/**
+ * Legacy function - get just the price
+ * Returns null if publisher not integrated
+ */
+export async function getPrice(hostname: string): Promise<number | null> {
+  const endpoint = await getEndpointByHostname(hostname)
+  return endpoint ? endpoint.price_usd : null
 }

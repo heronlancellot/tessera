@@ -1,21 +1,52 @@
 -- Tessera Seed Data
--- Example publisher for demo/testing
+-- Publishers and endpoints for demo/testing
 
 -- ============================================
--- DEMO PUBLISHER: Medium
+-- DEMO PUBLISHERS
 -- ============================================
 INSERT INTO publishers (name, slug, logo_url, website) VALUES
-  ('Medium', 'medium', 'https://miro.medium.com/v2/resize:fill:152:152/1*sHhtYhaCe2Uc3IU0IgKwIQ.png', 'https://medium.com');
+  ('Medium', 'medium', 'https://miro.medium.com/v2/resize:fill:152:152/1*sHhtYhaCe2Uc3IU0IgKwIQ.png', 'http://localhost:8080'),
+  ('The New York Times', 'nytimes', 'https://www.nytimes.com/vi-assets/static-assets/favicon.ico', 'https://www.nytimes.com'),
+  ('Reuters', 'reuters', 'https://www.reuters.com/pf/resources/images/reuters/favicon.ico', 'https://www.reuters.com'),
+  ('Nature', 'nature', 'https://www.nature.com/static/images/favicons/nature/apple-touch-icon.png', 'https://www.nature.com');
 
--- Demo endpoints (paywalled articles)
+-- Demo endpoints (simulating publisher partnership APIs)
 INSERT INTO endpoints (publisher_id, path, method, name, description, price_usd) VALUES
+  -- Medium (localhost:8080 - mock publisher API)
   (
     (SELECT id FROM publishers WHERE slug = 'medium'),
-    '/articles/*',
+    'http://localhost:8080/tessera/articles/:id',
     'GET',
-    'Read Article',
-    'Access to premium Medium articles',
+    'Premium Article',
+    'Access to premium Medium articles via Tessera partnership',
     0.10
+  ),
+  -- NYT (future partnership - would be real API)
+  (
+    (SELECT id FROM publishers WHERE slug = 'nytimes'),
+    'https://api.nytimes.com/tessera/content/:slug',
+    'GET',
+    'News Article',
+    'Access to NYT premium content',
+    0.25
+  ),
+  -- Reuters (future partnership)
+  (
+    (SELECT id FROM publishers WHERE slug = 'reuters'),
+    'https://api.reuters.com/partners/tessera/article/:id',
+    'GET',
+    'News Article',
+    'Access to Reuters premium content',
+    0.15
+  ),
+  -- Nature (future partnership)
+  (
+    (SELECT id FROM publishers WHERE slug = 'nature'),
+    'https://api.nature.com/tessera/articles/:doi',
+    'GET',
+    'Research Article',
+    'Access to Nature research papers',
+    0.50
   );
 
 -- ============================================

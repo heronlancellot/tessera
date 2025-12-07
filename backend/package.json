@@ -11,6 +11,6 @@
     "db:types": "npx supabase gen types typescript --local > types/database.ts"
   },
   "devDependencies": {
-    "supabase": "^2.19.7"
+    "supabase": "^2.65.6"
   }
 }
