@@ -19,7 +19,7 @@ INSERT INTO endpoints (publisher_id, path, method, name, description, price_usd)
     'GET',
     'Premium Article',
     'Access to premium Medium articles via Tessera partnership',
-    0.10
+    0.01
   ),
   -- NYT (future partnership - would be real API)
   (
