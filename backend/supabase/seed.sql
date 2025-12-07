@@ -49,18 +49,3 @@ INSERT INTO endpoints (publisher_id, path, method, name, description, price_usd)
     0.50
   );
 
--- ============================================
--- DEMO USER (for testing)
--- ============================================
-INSERT INTO users (wallet_address, name, email) VALUES
-  ('0xDemoWallet1234567890abcdef1234567890abcdef', 'Demo Developer', 'demo@tessera.dev');
-
--- Demo agent
-INSERT INTO agents (user_id, agent_id, name, description, budget_limit_usd) VALUES
-  (
-    (SELECT id FROM users WHERE wallet_address = '0xDemoWallet1234567890abcdef1234567890abcdef'),
-    'demo-agent-001',
-    'Demo Research Agent',
-    'Agent for testing article access',
-    10.00
-  );
