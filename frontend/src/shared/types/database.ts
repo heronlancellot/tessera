@@ -382,6 +382,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      validate_api_key: {
+        Args: { p_key_hash: string }
+        Returns: {
+          api_key_id: string
+          expires_at: string
+          is_valid: boolean
+          rate_limit: number
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       request_status: "pending" | "completed" | "failed"

@@ -14,10 +14,11 @@ import OpenAI from 'openai'
 
 config()
 
-// Initialize Tessera SDK with agent's wallet
+// Initialize Tessera SDK with agent's wallet and API key
 const tessera = new Tessera({
   privateKey: process.env.AGENT_PRIVATE_KEY!,
-  baseUrl: process.env.GATEWAY_URL || 'http://localhost:3001'
+  baseUrl: process.env.GATEWAY_URL || 'http://localhost:3001',
+  apiKey: process.env.TESSERA_API_KEY
 })
 
 // Initialize OpenAI
@@ -176,6 +177,11 @@ async function main() {
 
   if (!process.env.OPENAI_API_KEY) {
     console.error('❌ Missing OPENAI_API_KEY in .env')
+    process.exit(1)
+  }
+
+  if (!process.env.TESSERA_API_KEY) {
+    console.error('❌ Missing TESSERA_API_KEY in .env')
     process.exit(1)
   }
 

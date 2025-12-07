@@ -29,10 +29,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Missing userId or name" }, { status: 400 })
     }
 
+    // Verify user exists
+    const { data: userExists, error: userError } = await supabaseAdmin
+      .from("users")
+      .select("id")
+      .eq("id", userId)
+      .single()
+
+    if (userError || !userExists) {
+      logger.error("User not found", { userId, error: userError })
+      return NextResponse.json({ message: "User not found" }, { status: 404 })
+    }
+
     // Generate API key
     const apiKey = generateApiKey()
     const keyHash = hashApiKey(apiKey)
-    const keyPrefix = apiKey.substring(0, 12) // "tess_" + first 7 chars
+    const keyPrefix = apiKey.substring(0, 12)
     const expiresAt = calculateExpirationDate(expirationDays ?? null)
 
     // Store in database (using admin client to bypass RLS)
@@ -49,7 +61,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      logger.error("Database error creating API key", error)
+      logger.error("Failed to create API key", {
+        error,
+        code: error.code,
+        message: error.message,
+      })
       return NextResponse.json({ message: "Failed to create API key", error: error.message }, { status: 500 })
     }
 

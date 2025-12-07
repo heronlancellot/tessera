@@ -52,32 +52,61 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Upsert in public.users table (linked to auth.users via user_id)
-    const { data: publicUser, error: upsertError } = await supabaseAdmin
+    // First, try to find existing user in public.users by wallet_address or user_id
+    const { data: existingPublicUser } = await supabaseAdmin
       .from("users")
-      .upsert(
-        {
+      .select()
+      .or(`wallet_address.eq.${normalizedAddress},user_id.eq.${authUser.id}`)
+      .maybeSingle()
+
+    let publicUser
+
+    if (existingPublicUser) {
+      // Update existing user
+      const { data: updatedUser, error: updateError } = await supabaseAdmin
+        .from("users")
+        .update({
           user_id: authUser.id,
           wallet_address: normalizedAddress,
-        },
-        {
-          onConflict: "wallet_address",
-        }
-      )
-      .select()
-      .single()
+        })
+        .eq("id", existingPublicUser.id)
+        .select()
+        .single()
 
-    if (upsertError) {
-      logger.error("Failed to upsert public user", {
-        error: upsertError,
-        code: upsertError.code,
-        details: upsertError.details,
-        hint: upsertError.hint,
-        message: upsertError.message,
-        authUserId: authUser.id,
-        walletAddress: normalizedAddress
-      })
-      return NextResponse.json({ error: "Failed to save user data", details: upsertError.message }, { status: 500 })
+      if (updateError) {
+        logger.error("Failed to update public user", {
+          error: updateError,
+          code: updateError.code,
+          message: updateError.message,
+          existingUserId: existingPublicUser.id
+        })
+        return NextResponse.json({ error: "Failed to update user data" }, { status: 500 })
+      }
+
+      publicUser = updatedUser
+    } else {
+      // Insert new user
+      const { data: newUser, error: insertError } = await supabaseAdmin
+        .from("users")
+        .insert({
+          user_id: authUser.id,
+          wallet_address: normalizedAddress,
+        })
+        .select()
+        .single()
+
+      if (insertError) {
+        logger.error("Failed to insert public user", {
+          error: insertError,
+          code: insertError.code,
+          message: insertError.message,
+          authUserId: authUser.id,
+          walletAddress: normalizedAddress
+        })
+        return NextResponse.json({ error: "Failed to create user data" }, { status: 500 })
+      }
+
+      publicUser = newUser
     }
 
     // Generate a session for the user using a custom JWT
