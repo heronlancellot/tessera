@@ -51,7 +51,7 @@ export function WalletButton() {
               exit="exit"
             >
               <DropdownMenuItem
-                className="text-destructive cursor-pointer"
+                className="cursor-pointer"
                 onClick={handleDisconnect}
               >
                 <LogOut className="mr-2 size-4" />
