@@ -18,7 +18,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   SidebarSeparator,
 } from "@/shared/components/shadcn/sidebar"
 
@@ -28,11 +27,11 @@ const mainNavItems = [
     url: "/dashboard",
     icon: HomeIcon,
   },
-  {
-    title: "Playground",
-    url: "/dashboard/playground",
-    icon: TerminalIcon,
-  },
+  // {
+  //   title: "Playground",
+  //   url: "/dashboard/playground",
+  //   icon: TerminalIcon,
+  // },
 ]
 
 const bottomNavItems = [
@@ -46,11 +45,11 @@ const bottomNavItems = [
     url: "/dashboard/activity",
     icon: ActivityIcon,
   },
-  {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: SlidersHorizontalIcon,
-  },
+  // {
+  //   title: "Settings",
+  //   url: "/dashboard/settings",
+  //   icon: SlidersHorizontalIcon,
+  // },
 ]
 
 type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | ActivityIconHandle | SlidersHorizontalIconHandle
@@ -143,7 +142,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail />
     </Sidebar>
   )
 }
