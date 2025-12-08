@@ -17,7 +17,6 @@ export interface RequestLog {
   status: 'pending' | 'completed' | 'failed'
   errorMessage?: string
   responseTimeMs?: number
-  agentId?: string
 }
 
 /**
@@ -38,8 +37,7 @@ export async function logRequest(data: RequestLog): Promise<void> {
       p_tx_hash: data.txHash || null,
       p_status: data.status,
       p_error_message: data.errorMessage || null,
-      p_response_time_ms: data.responseTimeMs || null,
-      p_agent_id: data.agentId || null
+      p_response_time_ms: data.responseTimeMs || null
     })
 
     if (error) {

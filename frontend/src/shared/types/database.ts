@@ -34,53 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      agents: {
-        Row: {
-          agent_id: string
-          budget_limit_usd: number | null
-          budget_spent_usd: number | null
-          created_at: string | null
-          description: string | null
-          id: string
-          is_active: boolean | null
-          name: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          agent_id: string
-          budget_limit_usd?: number | null
-          budget_spent_usd?: number | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          agent_id?: string
-          budget_limit_usd?: number | null
-          budget_spent_usd?: number | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "agents_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       api_keys: {
         Row: {
           created_at: string | null
@@ -213,7 +166,6 @@ export type Database = {
       }
       requests: {
         Row: {
-          agent_id: string | null
           amount_usd: number
           api_key_id: string
           created_at: string | null
@@ -228,7 +180,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          agent_id?: string | null
           amount_usd?: number
           api_key_id: string
           created_at?: string | null
@@ -243,7 +194,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          agent_id?: string | null
           amount_usd?: number
           api_key_id?: string
           created_at?: string | null
@@ -258,13 +208,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "requests_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents"
-            referencedColumns: ["agent_id"]
-          },
           {
             foreignKeyName: "requests_api_key_id_fkey"
             columns: ["api_key_id"]
@@ -328,7 +271,6 @@ export type Database = {
     Views: {
       usage_summary: {
         Row: {
-          agent_id: string | null
           date: string | null
           endpoint_name: string | null
           failed_requests: number | null
@@ -339,13 +281,6 @@ export type Database = {
           user_id: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "requests_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents"
-            referencedColumns: ["agent_id"]
-          },
           {
             foreignKeyName: "requests_user_id_fkey"
             columns: ["user_id"]
@@ -367,7 +302,6 @@ export type Database = {
       }
       log_request: {
         Args: {
-          p_agent_id: string
           p_amount_usd: number
           p_api_key_id: string
           p_endpoint_id: string

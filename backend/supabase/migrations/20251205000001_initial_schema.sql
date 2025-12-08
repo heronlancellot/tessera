@@ -1,5 +1,5 @@
 -- Tessera Migration 001: Core Tables
--- Users, API Keys, Agents
+-- Users, API Keys
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -82,46 +82,10 @@ COMMENT ON COLUMN api_keys.key_hash IS 'SHA256 hash - never store raw key';
 COMMENT ON COLUMN api_keys.rate_limit IS 'Max requests per hour (default 100)';
 
 -- ============================================
--- AGENTS TABLE
--- Off-chain agent registry with budgets
--- ============================================
-CREATE TABLE agents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-
-  -- Identity (dev-friendly)
-  agent_id TEXT NOT NULL UNIQUE,
-  name TEXT NOT NULL,
-  description TEXT,
-
-  -- Budget (user defines)
-  budget_limit_usd DECIMAL(10, 2),
-  budget_spent_usd DECIMAL(10, 2) DEFAULT 0,
-
-  -- Status
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_agents_user ON agents(user_id);
-CREATE INDEX idx_agents_agent_id ON agents(agent_id);
-CREATE INDEX idx_agents_active ON agents(is_active) WHERE is_active = TRUE;
-
-CREATE TRIGGER agents_updated_at
-  BEFORE UPDATE ON agents
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-COMMENT ON TABLE agents IS 'Off-chain agent configurations';
-COMMENT ON COLUMN agents.agent_id IS 'Developer-defined unique ID (used in X-Agent-Id header)';
-COMMENT ON COLUMN agents.budget_limit_usd IS 'Max spending limit (NULL = unlimited)';
-
--- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
-ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
 
 -- Users: can see own profile (by wallet or auth.uid)
 CREATE POLICY users_select_own ON users
@@ -146,16 +110,6 @@ CREATE POLICY api_keys_all_own ON api_keys
     )
   );
 
--- Agents: user's own agents
-CREATE POLICY agents_all_own ON agents
-  FOR ALL USING (
-    user_id IN (
-      SELECT id FROM users
-      WHERE wallet_address = current_setting('app.current_wallet', true)
-         OR user_id = auth.uid()
-    )
-  );
-
 -- ============================================
 -- VERIFY MIGRATION
 -- ============================================
@@ -166,11 +120,11 @@ BEGIN
   SELECT COUNT(*) INTO table_count
   FROM information_schema.tables
   WHERE table_schema = 'public'
-  AND table_name IN ('users', 'api_keys', 'agents');
+  AND table_name IN ('users', 'api_keys');
 
-  IF table_count = 3 THEN
-    RAISE NOTICE '✅ Migration 001 successful! Core tables created (users, api_keys, agents)';
+  IF table_count = 2 THEN
+    RAISE NOTICE '✅ Migration 001 successful! Core tables created (users, api_keys)';
   ELSE
-    RAISE WARNING '⚠️ Migration 001 incomplete. Expected 3 tables, found %', table_count;
+    RAISE WARNING '⚠️ Migration 001 incomplete. Expected 2 tables, found %', table_count;
   END IF;
 END $$;

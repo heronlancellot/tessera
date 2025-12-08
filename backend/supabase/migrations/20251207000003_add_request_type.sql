@@ -26,8 +26,7 @@ CREATE OR REPLACE FUNCTION log_request(
   p_tx_hash TEXT,
   p_status request_status,
   p_error_message TEXT,
-  p_response_time_ms INTEGER,
-  p_agent_id TEXT
+  p_response_time_ms INTEGER
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -47,8 +46,7 @@ BEGIN
     tx_hash,
     status,
     error_message,
-    response_time_ms,
-    agent_id
+    response_time_ms
   ) VALUES (
     p_user_id,
     p_api_key_id,
@@ -59,8 +57,7 @@ BEGIN
     p_tx_hash,
     p_status,
     p_error_message,
-    p_response_time_ms,
-    p_agent_id
+    p_response_time_ms
   )
   RETURNING id INTO v_request_id;
 
@@ -69,7 +66,7 @@ END;
 $$;
 
 -- Grant execute to anon (Gateway uses anon key)
-GRANT EXECUTE ON FUNCTION log_request(UUID, UUID, request_type, TEXT, UUID, DECIMAL, TEXT, request_status, TEXT, INTEGER, TEXT) TO anon;
-GRANT EXECUTE ON FUNCTION log_request(UUID, UUID, request_type, TEXT, UUID, DECIMAL, TEXT, request_status, TEXT, INTEGER, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION log_request(UUID, UUID, request_type, TEXT, UUID, DECIMAL, TEXT, request_status, TEXT, INTEGER) TO anon;
+GRANT EXECUTE ON FUNCTION log_request(UUID, UUID, request_type, TEXT, UUID, DECIMAL, TEXT, request_status, TEXT, INTEGER) TO authenticated;
 
 COMMENT ON FUNCTION log_request IS 'Securely log Gateway requests without exposing RLS bypass to direct table access';
