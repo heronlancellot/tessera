@@ -7,6 +7,7 @@ import { Sparkles } from "lucide-react"
 import { HomeIcon, type HomeIconHandle } from "@/shared/components/animated-icons/home"
 import { TerminalIcon, type TerminalIconHandle } from "@/shared/components/animated-icons/terminal"
 import { KeyIcon, type KeyIconHandle } from "@/shared/components/animated-icons/key"
+import { ActivityIcon, type ActivityIconHandle } from "@/shared/components/animated-icons/activity"
 import { SlidersHorizontalIcon, type SlidersHorizontalIconHandle } from "@/shared/components/animated-icons/sliders-horizontal"
 import {
   Sidebar,
@@ -18,9 +19,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarSeparator,
 } from "@/shared/components/shadcn/sidebar"
 
-const navItems = [
+const mainNavItems = [
   {
     title: "Overview",
     url: "/dashboard",
@@ -31,10 +33,18 @@ const navItems = [
     url: "/dashboard/playground",
     icon: TerminalIcon,
   },
+]
+
+const bottomNavItems = [
   {
     title: "API Keys",
     url: "/dashboard/api-keys",
     icon: KeyIcon,
+  },
+  {
+    title: "Activity",
+    url: "/dashboard/activity",
+    icon: ActivityIcon,
   },
   {
     title: "Settings",
@@ -43,13 +53,13 @@ const navItems = [
   },
 ]
 
-type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | SlidersHorizontalIconHandle
+type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | ActivityIconHandle | SlidersHorizontalIconHandle
 
 function AnimatedMenuItem({
   item,
   isActive
 }: {
-  item: typeof navItems[number]
+  item: typeof mainNavItems[number] | typeof bottomNavItems[number]
   isActive: boolean
 }) {
   const iconRef = React.useRef<IconHandle>(null)
@@ -64,7 +74,11 @@ function AnimatedMenuItem({
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive}>
+      <SidebarMenuButton
+        asChild
+        isActive={isActive}
+        className="data-[active=true]:bg-green-800 data-[active=true]:text-white data-[active=true]:hover:bg-green-700"
+      >
         <Link
           href={item.url}
           onMouseEnter={handleMouseEnter}
@@ -104,7 +118,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {mainNavItems.map((item) => (
+                <AnimatedMenuItem
+                  key={item.title}
+                  item={item}
+                  isActive={pathname === item.url}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarSeparator className="mx-0" />
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {bottomNavItems.map((item) => (
                 <AnimatedMenuItem
                   key={item.title}
                   item={item}

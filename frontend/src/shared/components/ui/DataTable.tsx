@@ -27,6 +27,8 @@ interface DataTableProps<T> {
   className?: string
   /** Render function for mobile card view */
   mobileCard?: (item: T) => ReactNode
+  /** Render function for expanded row content */
+  expandedContent?: (item: T) => ReactNode
 }
 
 const rowVariants = {
@@ -42,6 +44,7 @@ export function DataTable<T>({
   isLoading,
   className,
   mobileCard,
+  expandedContent,
 }: DataTableProps<T>) {
   const alignmentClasses = {
     left: "text-left",
@@ -112,27 +115,36 @@ export function DataTable<T>({
               </thead>
               <tbody className="divide-y divide-border">
                 {data.map((item, index) => (
-                  <motion.tr
-                    key={keyExtractor(item)}
-                    className="hover:bg-muted/30 transition-colors"
-                    variants={rowVariants}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ delay: index * 0.03 }}
-                  >
-                    {columns.map((column) => (
-                      <td
-                        key={column.key}
-                        className={cn(
-                          "px-4 py-3 text-sm",
-                          alignmentClasses[column.align || "left"],
-                          column.hideOnTablet && "hidden lg:table-cell"
-                        )}
-                      >
-                        {column.render(item)}
-                      </td>
-                    ))}
-                  </motion.tr>
+                  <>
+                    <motion.tr
+                      key={keyExtractor(item)}
+                      className="hover:bg-muted/30 transition-colors"
+                      variants={rowVariants}
+                      initial="hidden"
+                      animate="visible"
+                      transition={{ delay: index * 0.03 }}
+                    >
+                      {columns.map((column) => (
+                        <td
+                          key={column.key}
+                          className={cn(
+                            "px-4 py-3 text-sm",
+                            alignmentClasses[column.align || "left"],
+                            column.hideOnTablet && "hidden lg:table-cell"
+                          )}
+                        >
+                          {column.render(item)}
+                        </td>
+                      ))}
+                    </motion.tr>
+                    {expandedContent && (
+                      <tr key={`${keyExtractor(item)}-expanded`}>
+                        <td colSpan={columns.length} className="p-0">
+                          {expandedContent(item)}
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
@@ -167,28 +179,37 @@ export function DataTable<T>({
           </thead>
           <tbody className="divide-y divide-border">
             {data.map((item, index) => (
-              <motion.tr
-                key={keyExtractor(item)}
-                className="hover:bg-muted/30 transition-colors"
-                variants={rowVariants}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: index * 0.03 }}
-              >
-                {columns.map((column) => (
-                  <td
-                    key={column.key}
-                    className={cn(
-                      "px-4 py-3 text-sm",
-                      alignmentClasses[column.align || "left"],
-                      column.hideOnMobile && "hidden sm:table-cell",
-                      column.hideOnTablet && "hidden lg:table-cell"
-                    )}
-                  >
-                    {column.render(item)}
-                  </td>
-                ))}
-              </motion.tr>
+              <>
+                <motion.tr
+                  key={keyExtractor(item)}
+                  className="hover:bg-muted/30 transition-colors"
+                  variants={rowVariants}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: index * 0.03 }}
+                >
+                  {columns.map((column) => (
+                    <td
+                      key={column.key}
+                      className={cn(
+                        "px-4 py-3 text-sm",
+                        alignmentClasses[column.align || "left"],
+                        column.hideOnMobile && "hidden sm:table-cell",
+                        column.hideOnTablet && "hidden lg:table-cell"
+                      )}
+                    >
+                      {column.render(item)}
+                    </td>
+                  ))}
+                </motion.tr>
+                {expandedContent && (
+                  <tr key={`${keyExtractor(item)}-expanded`}>
+                    <td colSpan={columns.length} className="p-0">
+                      {expandedContent(item)}
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
         </table>
