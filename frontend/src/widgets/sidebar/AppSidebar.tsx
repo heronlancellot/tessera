@@ -3,7 +3,11 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Key, Settings, Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react"
+import { HomeIcon, type HomeIconHandle } from "@/shared/components/animated-icons/home"
+import { TerminalIcon, type TerminalIconHandle } from "@/shared/components/animated-icons/terminal"
+import { KeyIcon, type KeyIconHandle } from "@/shared/components/animated-icons/key"
+import { SettingsIcon, type SettingsIconHandle } from "@/shared/components/animated-icons/settings"
 import {
   Sidebar,
   SidebarContent,
@@ -18,26 +22,61 @@ import {
 
 const navItems = [
   {
-    title: "Dashboard",
+    title: "Overview",
     url: "/dashboard",
-    icon: LayoutDashboard,
+    icon: HomeIcon,
   },
   {
     title: "Playground",
     url: "/dashboard/playground",
-    icon: Sparkles,
+    icon: TerminalIcon,
   },
   {
     title: "API Keys",
     url: "/dashboard/api-keys",
-    icon: Key,
+    icon: KeyIcon,
   },
   {
     title: "Settings",
     url: "/dashboard/settings",
-    icon: Settings,
+    icon: SettingsIcon,
   },
 ]
+
+type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | SettingsIconHandle
+
+function AnimatedMenuItem({
+  item,
+  isActive
+}: {
+  item: typeof navItems[number]
+  isActive: boolean
+}) {
+  const iconRef = React.useRef<IconHandle>(null)
+
+  const handleMouseEnter = React.useCallback(() => {
+    iconRef.current?.startAnimation()
+  }, [])
+
+  const handleMouseLeave = React.useCallback(() => {
+    iconRef.current?.stopAnimation()
+  }, [])
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={isActive}>
+        <Link
+          href={item.url}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <item.icon ref={iconRef} size={16} />
+          <span>{item.title}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
@@ -66,14 +105,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <AnimatedMenuItem
+                  key={item.title}
+                  item={item}
+                  isActive={pathname === item.url}
+                />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>

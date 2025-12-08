@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThirdwebProvider } from "thirdweb/react";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/shared/components/shadcn/sonner";
 import { TOAST_CONFIG } from "@/shared/config/toast.config";
 import { Urbanist } from "next/font/google";
 

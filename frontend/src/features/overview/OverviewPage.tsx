@@ -2,14 +2,14 @@
 
 import { BaseLayout } from "@/shared/components/layouts/BaseLayout"
 
-export function DashboardPage() {
+export function OverviewPage() {
   return (
-    <BaseLayout title="Dashboard">
+    <BaseLayout title="Overview">
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div className="mb-4">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">Overview</h1>
           <p className="text-muted-foreground mt-2">
-            Welcome to your Tessera dashboard
+            Welcome to your Tessera overview
           </p>
         </div>
 
