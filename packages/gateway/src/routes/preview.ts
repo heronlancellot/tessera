@@ -3,12 +3,14 @@ import type { Router as RouterType } from 'express'
 import { fetchHtml } from '../services/scraper.js'
 import { htmlToMarkdown } from '../services/converter.js'
 import { getPrice } from '../services/pricing.js'
+import { logRequest } from '../services/analytics.js'
 
 export const previewRouter: RouterType = Router()
 
 // GET /preview?url=https://medium.com/article-xyz
 previewRouter.get('/', async (req: Request, res: Response) => {
   const { url } = req.query
+  const startTime = Date.now()
 
   if (!url || typeof url !== 'string') {
     res.status(400).json({ error: 'Missing url parameter' })
@@ -31,6 +33,19 @@ previewRouter.get('/', async (req: Request, res: Response) => {
     // Get price for this URL
     const price = await getPrice(parsedUrl.hostname)
 
+    // Log request (fire-and-forget)
+    if (req.userId && req.apiKeyId) {
+      logRequest({
+        userId: req.userId,
+        apiKeyId: req.apiKeyId,
+        requestType: 'preview',
+        url,
+        amountUsd: 0, // Preview is free
+        status: 'completed',
+        responseTimeMs: Date.now() - startTime
+      })
+    }
+
     res.json({
       url,
       title: extractTitle(html),
@@ -41,6 +56,21 @@ previewRouter.get('/', async (req: Request, res: Response) => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
+
+    // Log failed request
+    if (req.userId && req.apiKeyId) {
+      logRequest({
+        userId: req.userId,
+        apiKeyId: req.apiKeyId,
+        requestType: 'preview',
+        url: url as string,
+        amountUsd: 0,
+        status: 'failed',
+        errorMessage: message,
+        responseTimeMs: Date.now() - startTime
+      })
+    }
+
     res.status(500).json({ error: message })
   }
 })

@@ -7,7 +7,7 @@ import { Sparkles } from "lucide-react"
 import { HomeIcon, type HomeIconHandle } from "@/shared/components/animated-icons/home"
 import { TerminalIcon, type TerminalIconHandle } from "@/shared/components/animated-icons/terminal"
 import { KeyIcon, type KeyIconHandle } from "@/shared/components/animated-icons/key"
-import { SettingsIcon, type SettingsIconHandle } from "@/shared/components/animated-icons/settings"
+import { SlidersHorizontalIcon, type SlidersHorizontalIconHandle } from "@/shared/components/animated-icons/sliders-horizontal"
 import {
   Sidebar,
   SidebarContent,
@@ -39,11 +39,11 @@ const navItems = [
   {
     title: "Settings",
     url: "/dashboard/settings",
-    icon: SettingsIcon,
+    icon: SlidersHorizontalIcon,
   },
 ]
 
-type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | SettingsIconHandle
+type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | SlidersHorizontalIconHandle
 
 function AnimatedMenuItem({
   item,

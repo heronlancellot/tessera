@@ -220,6 +220,7 @@ export type Database = {
           endpoint_id: string | null
           error_message: string | null
           id: string
+          request_type: Database["public"]["Enums"]["request_type"]
           response_time_ms: number | null
           status: Database["public"]["Enums"]["request_status"] | null
           tx_hash: string | null
@@ -228,12 +229,13 @@ export type Database = {
         }
         Insert: {
           agent_id?: string | null
-          amount_usd: number
+          amount_usd?: number
           api_key_id: string
           created_at?: string | null
           endpoint_id?: string | null
           error_message?: string | null
           id?: string
+          request_type?: Database["public"]["Enums"]["request_type"]
           response_time_ms?: number | null
           status?: Database["public"]["Enums"]["request_status"] | null
           tx_hash?: string | null
@@ -248,6 +250,7 @@ export type Database = {
           endpoint_id?: string | null
           error_message?: string | null
           id?: string
+          request_type?: Database["public"]["Enums"]["request_type"]
           response_time_ms?: number | null
           status?: Database["public"]["Enums"]["request_status"] | null
           tx_hash?: string | null
@@ -362,6 +365,22 @@ export type Database = {
           total_spent: number
         }[]
       }
+      log_request: {
+        Args: {
+          p_agent_id: string
+          p_amount_usd: number
+          p_api_key_id: string
+          p_endpoint_id: string
+          p_error_message: string
+          p_request_type: Database["public"]["Enums"]["request_type"]
+          p_response_time_ms: number
+          p_status: Database["public"]["Enums"]["request_status"]
+          p_tx_hash: string
+          p_url: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       register_wallet: {
         Args: { wallet_addr: string }
         Returns: {
@@ -395,6 +414,7 @@ export type Database = {
     }
     Enums: {
       request_status: "pending" | "completed" | "failed"
+      request_type: "preview" | "fetch"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -526,6 +546,7 @@ export const Constants = {
   public: {
     Enums: {
       request_status: ["pending", "completed", "failed"],
+      request_type: ["preview", "fetch"],
     },
   },
 } as const

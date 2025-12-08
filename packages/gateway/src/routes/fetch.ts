@@ -3,12 +3,14 @@ import type { Router as RouterType } from 'express'
 import { htmlToMarkdown } from '../services/converter.js'
 import { getEndpointByHostname } from '../services/pricing.js'
 import { settleX402Payment, isX402Configured } from '../middleware/x402.js'
+import { logRequest } from '../services/analytics.js'
 
 export const fetchRouter: RouterType = Router()
 
 // GET /fetch?url=https://medium.com/article-xyz
 fetchRouter.get('/', async (req: Request, res: Response) => {
   const { url } = req.query
+  const startTime = Date.now()
 
   if (!url || typeof url !== 'string') {
     res.status(400).json({ error: 'Missing url parameter' })
@@ -99,6 +101,21 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
       ? htmlToMarkdown(publisherData.content, url)
       : publisherData.markdown || 'No content available'
 
+    // Log successful request
+    if (req.userId && req.apiKeyId) {
+      logRequest({
+        userId: req.userId,
+        apiKeyId: req.apiKeyId,
+        requestType: 'fetch',
+        url,
+        endpointId: endpointInfo.id,
+        amountUsd: endpointInfo.price_usd,
+        txHash: result.paymentReceipt?.transaction,
+        status: 'completed',
+        responseTimeMs: Date.now() - startTime
+      })
+    }
+
     res.json({
       url,
       markdown,
@@ -111,6 +128,21 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Fetch error:', error)
+
+    // Log failed request
+    if (req.userId && req.apiKeyId) {
+      logRequest({
+        userId: req.userId,
+        apiKeyId: req.apiKeyId,
+        requestType: 'fetch',
+        url: url as string,
+        amountUsd: 0, // Failed, no charge
+        status: 'failed',
+        errorMessage: message,
+        responseTimeMs: Date.now() - startTime
+      })
+    }
+
     res.status(500).json({ error: message })
   }
 })

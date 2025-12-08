@@ -34,10 +34,18 @@ function getFacilitator() {
   return _facilitator
 }
 
-interface SettleResult {
+export interface PaymentReceipt {
+  success: boolean
+  transaction: string
+  network: string
+  payer: string
+}
+
+export interface SettleResult {
   status: number
   responseBody?: unknown
   responseHeaders?: Record<string, string>
+  paymentReceipt?: PaymentReceipt
 }
 
 /**
