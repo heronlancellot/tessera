@@ -1,35 +1,33 @@
 "use client"
 
+import { motion } from "framer-motion"
+import { fadeInVariants } from "@/shared/utils/animations"
 import { BaseLayout } from "@/shared/components/layouts/BaseLayout"
+import { PageHeader } from "@/shared/components/ui"
+import { UsageCard } from "./components/UsageCard"
+import { SDKSetupCard } from "./components/SDKSetupCard"
+import { PublishersCard } from "./components/PublishersCard"
 
 export function OverviewPage() {
   return (
     <BaseLayout title="Overview">
-      <div className="flex flex-1 flex-col gap-4 p-4">
-        <div className="mb-4">
-          <h1 className="text-3xl font-bold">Overview</h1>
-          <p className="text-muted-foreground mt-2">
-            Welcome to your Tessera overview
-          </p>
+      <motion.div
+        className="flex flex-1 flex-col gap-6 p-6"
+        variants={fadeInVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <PageHeader
+          title="Overview"
+          description="Welcome to your Tessera dashboard"
+        />
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <UsageCard />
+          <SDKSetupCard />
+          <PublishersCard />
         </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="bg-card border rounded-lg p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">API Keys</h3>
-            <p className="text-sm text-muted-foreground">Manage your API keys</p>
-          </div>
-
-          <div className="bg-card border rounded-lg p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">Active Agents</h3>
-            <p className="text-sm text-muted-foreground">Configure your AI agents</p>
-          </div>
-
-          <div className="bg-card border rounded-lg p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">Usage</h3>
-            <p className="text-sm text-muted-foreground">View usage statistics</p>
-          </div>
-        </div>
-      </div>
+      </motion.div>
     </BaseLayout>
   )
 }
