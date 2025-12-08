@@ -19,7 +19,9 @@ BEGIN
   SELECT
     ak.user_id,
     ak.id AS api_key_id,
-    ak.is_active AND (ak.expires_at IS NULL OR ak.expires_at > NOW()) AS is_valid,
+    ak.is_active
+      AND (ak.expires_at IS NULL OR ak.expires_at > NOW())
+      AND ak.deleted_at IS NULL AS is_valid,
     ak.expires_at,
     ak.rate_limit
   FROM api_keys ak

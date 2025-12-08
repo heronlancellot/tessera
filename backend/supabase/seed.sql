@@ -6,8 +6,8 @@
 -- ============================================
 INSERT INTO publishers (name, slug, logo_url, website) VALUES
   ('Medium', 'medium', 'https://miro.medium.com/v2/resize:fill:152:152/1*sHhtYhaCe2Uc3IU0IgKwIQ.png', 'http://localhost:8080'),
-  ('The New York Times', 'nytimes', 'https://www.nytimes.com/vi-assets/static-assets/favicon.ico', 'https://www.nytimes.com'),
-  ('Reuters', 'reuters', 'https://www.reuters.com/pf/resources/images/reuters/favicon.ico', 'https://www.reuters.com'),
+  ('The New York Times', 'nytimes', 'https://static01.nyt.com/images/icons/t_logo_291_black.png', 'https://www.nytimes.com'),
+  ('Reuters', 'reuters', 'https://static.wikia.nocookie.net/logopedia/images/5/53/Reuters_2008_vertical.svg/revision/latest?cb=20240525053744', 'https://www.reuters.com'),
   ('Nature', 'nature', 'https://www.nature.com/static/images/favicons/nature/apple-touch-icon.png', 'https://www.nature.com');
 
 -- Demo endpoints (simulating publisher partnership APIs)

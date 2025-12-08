@@ -17,18 +17,18 @@ export function ApiKeysTable({
   onDeleteKey,
   isLoading,
 }: ApiKeysTableProps) {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [keyToDelete, setKeyToDelete] = useState<ApiKey | null>(null)
+  const [revokeModalOpen, setRevokeModalOpen] = useState(false)
+  const [keyToRevoke, setKeyToRevoke] = useState<ApiKey | null>(null)
 
-  const handleDeleteClick = (key: ApiKey) => {
-    setKeyToDelete(key)
-    setDeleteModalOpen(true)
+  const handleRevokeClick = (key: ApiKey) => {
+    setKeyToRevoke(key)
+    setRevokeModalOpen(true)
   }
 
-  const handleConfirmDelete = async () => {
-    if (keyToDelete) {
-      await onDeleteKey(keyToDelete.id)
-      setKeyToDelete(null)
+  const handleConfirmRevoke = async () => {
+    if (keyToRevoke) {
+      await onDeleteKey(keyToRevoke.id)
+      setKeyToRevoke(null)
     }
   }
   const formatExpiration = (expiresAt: string | null) => {
@@ -102,8 +102,8 @@ export function ApiKeysTable({
         <IconButton
           size="sm"
           variant="destructive"
-          onClick={() => handleDeleteClick(key)}
-          tooltip="Delete API key"
+          onClick={() => handleRevokeClick(key)}
+          tooltip="Revoke API key"
         >
           <Trash2 />
         </IconButton>
@@ -117,7 +117,7 @@ export function ApiKeysTable({
       {/* Header: Name + Actions */}
       <div className="flex items-center justify-between">
         <span className="font-medium text-base">{key.name}</span>
-        <IconButton size="sm" variant="destructive" onClick={() => handleDeleteClick(key)}>
+        <IconButton size="sm" variant="destructive" onClick={() => handleRevokeClick(key)}>
           <Trash2 />
         </IconButton>
       </div>
@@ -153,15 +153,15 @@ export function ApiKeysTable({
         }
       />
 
-      {/* Delete Confirmation Modal */}
-      {keyToDelete && (
+      {/* Revoke Confirmation Modal */}
+      {keyToRevoke && (
         <ConfirmModal
-          open={deleteModalOpen}
-          onOpenChange={setDeleteModalOpen}
-          title="Delete API Key"
-          description={`Are you sure you want to delete the API key "${keyToDelete.name}"? This action cannot be undone.`}
-          confirmText="DELETE"
-          onConfirm={handleConfirmDelete}
+          open={revokeModalOpen}
+          onOpenChange={setRevokeModalOpen}
+          title="Revoke API Key"
+          description={`Are you sure you want to revoke the API key "${keyToRevoke.name}"? It will no longer be able to make requests. Request history will be preserved for audit purposes.`}
+          confirmText="REVOKE"
+          onConfirm={handleConfirmRevoke}
           variant="destructive"
         />
       )}

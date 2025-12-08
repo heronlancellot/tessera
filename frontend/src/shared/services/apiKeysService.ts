@@ -2,13 +2,14 @@ import { supabase } from "@/shared/utils/supabase"
 
 export const apiKeysService = {
   /**
-   * Lista todas as API keys do usuário
+   * Lista todas as API keys do usuário (somente ativas)
    */
   async listKeys(userId: string) {
     const { data, error } = await supabase
       .from("api_keys")
       .select("*")
       .eq("user_id", userId)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
 
     if (error) throw error
@@ -35,12 +36,13 @@ export const apiKeysService = {
   },
 
   /**
-   * Deleta uma API key
+   * Revoga uma API key (soft delete)
+   * Mantém o histórico de requests para auditoria
    */
   async deleteKey(keyId: string) {
     const { error } = await supabase
       .from("api_keys")
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq("id", keyId)
 
     if (error) throw error
