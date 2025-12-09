@@ -6,6 +6,18 @@ settings:
 
 importers:
 
+  .:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.1
+      prettier:
+        specifier: ^3.4.2
+        version: 3.7.4
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   backend:
     devDependencies:
       supabase:
@@ -3972,6 +3984,11 @@ packages:
 
   preact@10.28.0:
     resolution: {integrity: sha512-rytDAoiXr3+t6OIP3WGlDd0ouCUG1iCWzkcY3++Nreuoi17y6T5i/zRhe6uYfoVcxq6YU+sBtJouuRDsq8vvqA==}
+
+  prettier@3.7.4:
+    resolution: {integrity: sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==}
+    engines: {node: '>=14'}
+    hasBin: true
 
   proc-log@6.1.0:
     resolution: {integrity: sha512-iG+GYldRf2BQ0UDUAd6JQ/RwzaQy6mXmsk/IzlYyal4A4SNFw54MeH4/tLkF4I5WoWG9SQwuqWzS99jaFQHBuQ==}
@@ -9973,6 +9990,8 @@ snapshots:
   preact@10.24.2: {}
 
   preact@10.28.0: {}
+
+  prettier@3.7.4: {}
 
   proc-log@6.1.0: {}
 

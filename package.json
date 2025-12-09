@@ -1,0 +1,32 @@
+{
+  "name": "tessera",
+  "version": "0.1.0",
+  "description": "Tessera Monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.22.0",
+  "scripts": {
+    "dev": "pnpm --filter @tessera/frontend dev",
+    "build": "pnpm --filter @tessera/frontend build",
+    "start": "pnpm --filter @tessera/frontend start",
+    "frontend": "pnpm --filter @tessera/frontend",
+    "backend": "pnpm --filter @tessera/database",
+    "sdk": "pnpm --filter @tessera/sdk",
+    "gateway": "pnpm --filter @tessera/gateway",
+    "dev:gateway": "pnpm --filter @tessera/gateway dev",
+    "dev:sdk": "pnpm --filter @tessera/sdk dev",
+    "build:all": "pnpm -r build",
+    "clean": "pnpm -r clean && rm -rf node_modules .turbo coverage *.log *.tsbuildinfo",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "typecheck": "pnpm -r typecheck",
+    "db:start": "pnpm --filter @tessera/database db:start",
+    "db:stop": "pnpm --filter @tessera/database db:stop",
+    "db:reset": "pnpm --filter @tessera/database db:reset",
+    "db:types": "pnpm --filter @tessera/database db:types"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}
