@@ -1,8 +1,8 @@
 -- Tessera Migration 001: Core Tables
 -- Users, API Keys
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable UUID extension (pgcrypto is enabled by default in Supabase)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ============================================
 -- UPDATED_AT TRIGGER FUNCTION
@@ -21,7 +21,7 @@ $$ LANGUAGE plpgsql;
 -- Wallet = obrigatório | Social = opcional
 -- ============================================
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Auth: wallet é obrigatório, social é opcional
   wallet_address TEXT NOT NULL UNIQUE,
@@ -55,7 +55,7 @@ COMMENT ON COLUMN users.user_id IS 'Supabase Auth user (optional, for social log
 -- Authentication tokens for SDK access
 -- ============================================
 CREATE TABLE api_keys (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 
   -- Key data
