@@ -13,7 +13,6 @@ CREATE TABLE requests (
   -- Who
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   api_key_id UUID NOT NULL REFERENCES api_keys(id) ON DELETE CASCADE,
-  agent_id TEXT REFERENCES agents(agent_id) ON DELETE SET NULL,
 
   -- What
   endpoint_id UUID REFERENCES endpoints(id) ON DELETE SET NULL,
@@ -32,7 +31,6 @@ CREATE TABLE requests (
 );
 
 CREATE INDEX idx_requests_user ON requests(user_id);
-CREATE INDEX idx_requests_agent ON requests(agent_id) WHERE agent_id IS NOT NULL;
 CREATE INDEX idx_requests_endpoint ON requests(endpoint_id);
 CREATE INDEX idx_requests_created ON requests(created_at DESC);
 CREATE INDEX idx_requests_user_created ON requests(user_id, created_at DESC);
@@ -47,7 +45,6 @@ COMMENT ON TABLE requests IS 'API request and payment logs';
 CREATE VIEW usage_summary AS
 SELECT
   r.user_id,
-  r.agent_id,
   DATE(r.created_at) as date,
   COUNT(*) as total_requests,
   COUNT(*) FILTER (WHERE r.status = 'completed') as successful_requests,
@@ -58,7 +55,7 @@ SELECT
 FROM requests r
 LEFT JOIN endpoints e ON r.endpoint_id = e.id
 LEFT JOIN publishers p ON e.publisher_id = p.id
-GROUP BY r.user_id, r.agent_id, DATE(r.created_at), p.slug, e.name;
+GROUP BY r.user_id, DATE(r.created_at), p.slug, e.name;
 
 COMMENT ON VIEW usage_summary IS 'Aggregated usage stats - computed on demand';
 
