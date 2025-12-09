@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ['pino', 'thread-stream'],
-  transpilePackages: ['@tessera/sdk'],
 }
 
 export default nextConfig
