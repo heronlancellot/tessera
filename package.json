@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Tessera Monorepo",
   "private": true,
-  "packageManager": "pnpm@9.5.0",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "pnpm --filter @tessera/frontend dev",
     "build": "pnpm --filter @tessera/frontend build",
