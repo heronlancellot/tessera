@@ -40,8 +40,10 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17",
-    "thirdweb": "^5.115.2",
-    "typescript": "^5.9.3"
+    "thirdweb": "^5.115.2"
   },
-  "packageManager": "pnpm@10.22.0"
+  "packageManager": "pnpm@9.5.0",
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
 }
