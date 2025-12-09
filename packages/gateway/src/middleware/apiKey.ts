@@ -43,6 +43,12 @@ function hashApiKey(apiKey: string): string {
 export function validateApiKey(required = false) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Allow OPTIONS requests (CORS preflight) to pass through
+      if (req.method === 'OPTIONS') {
+        next()
+        return
+      }
+
       // Extract API key from Authorization header
       const authHeader = req.headers['authorization']
 
