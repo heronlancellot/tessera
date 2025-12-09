@@ -22,6 +22,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@supabase/supabase-js": "^2.86.2",
     "@tailwindcss/postcss": "^4.1.17",
+    "@tessera/sdk": "workspace:^",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
