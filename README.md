@@ -16,6 +16,7 @@ Tessera enables AI agents to autonomously access premium content from publishers
 
 ## Architecture
 
+
 ```
 ┌─────────────────┐
 │   AI Agent      │  (research-agent example)
