@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm --filter @tessera/frontend build",
   "devCommand": "pnpm --filter @tessera/frontend dev",
-  "installCommand": "corepack enable && corepack prepare pnpm@10.0.0 --activate && pnpm install --no-frozen-lockfile",
+  "installCommand": "corepack enable && corepack prepare pnpm@9.12.3 --activate && pnpm install",
   "framework": "nextjs",
   "outputDirectory": "frontend/.next"
 }

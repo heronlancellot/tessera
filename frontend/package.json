@@ -42,7 +42,7 @@
     "tailwindcss": "^4.1.17",
     "thirdweb": "^5.115.2"
   },
-  "packageManager": "pnpm@9.5.0",
+  "packageManager": "pnpm@9.12.3",
   "devDependencies": {
     "typescript": "5.9.3"
   }
