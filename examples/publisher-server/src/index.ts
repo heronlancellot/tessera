@@ -9,7 +9,8 @@ import express from 'express'
 import cors from 'cors'
 
 const app = express()
-const PORT = 8080
+// Use PORT from environment (Vercel provides this) or default to 8080 for local dev
+const PORT = process.env.PORT || 8080
 
 app.use(cors())
 app.use(express.json())
@@ -210,7 +211,14 @@ app.get('/', (req, res) => {
   })
 })
 
-app.listen(PORT, () => {
-  console.log(`📰 Publisher Server (Medium) running on http://localhost:${PORT}`)
-  console.log(`📚 Endpoint: http://localhost:${PORT}/tessera/articles/:id`)
-})
+// Only start server if not in Vercel (Vercel handles this automatically)
+// In Vercel, export the app as a serverless function
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`📰 Publisher Server (Medium) running on http://localhost:${PORT}`)
+    console.log(`📚 Endpoint: http://localhost:${PORT}/tessera/articles/:id`)
+  })
+}
+
+// Export for Vercel serverless functions
+export default app
