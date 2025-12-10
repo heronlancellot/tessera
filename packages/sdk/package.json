@@ -1,5 +1,5 @@
 {
-  "name": "@tessera/sdk",
+  "name": "@tessera-sdk/sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for AI agents to access paywalled content via x402 micropayments",
   "type": "module",
