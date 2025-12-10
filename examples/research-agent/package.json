@@ -7,7 +7,7 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
-    "@tessera/sdk": "workspace:*",
+    "@tessera-sdk/sdk": "workspace:*",
     "openai": "^4.77.3",
     "dotenv": "^16.4.7"
   },

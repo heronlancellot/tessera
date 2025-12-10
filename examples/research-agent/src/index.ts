@@ -9,7 +9,7 @@
  */
 
 import { config } from 'dotenv'
-import { Tessera } from '@tessera/sdk'
+import { Tessera } from '@tessera-sdk/sdk'
 import OpenAI from 'openai'
 
 config()
