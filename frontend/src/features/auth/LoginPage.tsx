@@ -44,16 +44,52 @@ export function LoginPage() {
   }, [account, isAuthenticating, router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="text-center space-y-6 p-8 bg-white rounded-lg shadow-lg">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">Tessera</h1>
-          <p className="text-muted-foreground">AI Agent Gateway</p>
-          <p className="text-sm text-muted-foreground mt-1">
+    <div className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#545454' }}>
+      <div className="text-center space-y-8 p-12">
+        {/* Logo Section */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="flex items-end gap-1">
+            <span
+              className="text-white font-serif italic leading-none"
+              style={{ fontFamily: '"Times New Roman", Times, serif', fontSize: '5rem', fontWeight: '400' }}
+            >
+              paper
+            </span>
+            <span
+              className="text-white font-bold leading-none"
+              style={{ fontFamily: 'var(--font-be-vietnam), sans-serif', fontSize: '5rem' }}
+            >
+              lab.
+            </span>
+          </div>
+          <img
+            src="/PaperLabLogo.png"
+            alt="PaperLab Mascot"
+            className="size-36 object-contain"
+          />
+        </div>
+
+        {/* Subtitle */}
+        <div className="space-y-4 mb-8">
+          <p
+            className="text-white text-3xl font-semibold"
+            style={{ fontFamily: 'var(--font-be-vietnam), sans-serif' }}
+          >
+            AI Agent Gateway
+          </p>
+          <p
+            className="text-white/70 text-lg"
+            style={{ fontFamily: 'var(--font-be-vietnam), sans-serif' }}
+          >
             Connect your wallet to access the dashboard
           </p>
         </div>
-        <ConnectButton client={client} chain={avalancheFuji} />
+
+        {/* Connect Button */}
+        <div className="mt-8">
+          <ConnectButton client={client} chain={avalancheFuji} />
+        </div>
+
       </div>
     </div>
   )

@@ -6,7 +6,7 @@
 -- API providers (OpenAI, Anthropic, etc)
 -- ============================================
 CREATE TABLE publishers (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Identity
   name TEXT NOT NULL,
@@ -34,7 +34,7 @@ COMMENT ON TABLE publishers IS 'API providers (OpenAI, Anthropic, etc)';
 -- Individual monetized routes per publisher
 -- ============================================
 CREATE TABLE endpoints (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   publisher_id UUID NOT NULL REFERENCES publishers(id) ON DELETE CASCADE,
 
   -- Route info

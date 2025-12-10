@@ -3,11 +3,17 @@ import "./globals.css";
 import { ThirdwebProvider } from "thirdweb/react";
 import { Toaster } from "@/shared/components/shadcn/sonner";
 import { TOAST_CONFIG } from "@/shared/config/toast.config";
-import { Urbanist } from "next/font/google";
+import { Urbanist, Be_Vietnam_Pro } from "next/font/google";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
   variable: "--font-urbanist",
+});
+
+const beVietnam = Be_Vietnam_Pro({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-be-vietnam",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={urbanist.variable}>
+      <body className={`${urbanist.variable} ${beVietnam.variable}`}>
         <ThirdwebProvider>
           {children}
           <Toaster {...TOAST_CONFIG} closeButton />

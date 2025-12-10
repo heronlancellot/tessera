@@ -26,7 +26,7 @@ export function htmlToMarkdown(html: string, url?: string): string {
     }
 
     // 3. Convert clean HTML to Markdown with Turndown
-    const markdown = convertHtmlToMarkdown(article.content)
+    const markdown = convertHtmlToMarkdown(article.content || '')
 
     // Optional: prepend title if available
     if (article.title) {
