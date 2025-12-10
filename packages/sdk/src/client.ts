@@ -11,13 +11,33 @@ import type {
 
 const DEFAULT_BASE_URL = 'http://localhost:3001'
 
+/**
+ * Normalize base URL to ensure it has a protocol
+ * Handles cases where URL is provided without http:// or https://
+ */
+function normalizeBaseUrl(url: string): string {
+  // If already has protocol, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  
+  // For localhost or 127.0.0.1, default to http
+  if (url.includes('localhost') || url.includes('127.0.0.1')) {
+    return `http://${url}`
+  }
+  
+  // For production domains, default to https
+  return `https://${url}`
+}
+
 export class Tessera {
   private baseUrl: string
   private apiKey?: string
   private account?: PrivateKeyAccount
 
   constructor(config: TesseraConfig = {}) {
-    this.baseUrl = config.baseUrl || DEFAULT_BASE_URL
+    const rawBaseUrl = config.baseUrl || DEFAULT_BASE_URL
+    this.baseUrl = normalizeBaseUrl(rawBaseUrl)
     this.apiKey = config.apiKey
 
     if (config.privateKey) {
