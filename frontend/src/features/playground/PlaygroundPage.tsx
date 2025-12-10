@@ -6,8 +6,8 @@ import { Loader2, Play, Eye, Download, Copy, Check, AlertTriangle } from "lucide
 import { fadeInVariants } from "@/shared/utils/animations"
 import { BaseLayout } from "@/shared/components/layouts/BaseLayout"
 import { PageHeader } from "@/shared/components/ui"
-import { Tessera } from "@tessera/sdk"
-import type { PreviewResponse, FetchResponse } from "@tessera/sdk"
+import { Tessera } from "@tessera-sdk/sdk"
+import type { PreviewResponse, FetchResponse } from "@tessera-sdk/sdk"
 import {
   Card,
   CardContent,

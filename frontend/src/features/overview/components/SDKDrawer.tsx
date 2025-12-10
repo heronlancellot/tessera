@@ -25,7 +25,7 @@ const LANGUAGES = [
 ]
 
 const getCodeSnippet = (language: string, apiKey: string) => {
-  const jsSnippet = `import { Tessera } from '@tessera/sdk'
+  const jsSnippet = `import { Tessera } from '@tessera-sdk/sdk'
 
 // Initialize SDK
 const tessera = new Tessera({
