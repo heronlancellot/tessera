@@ -16,18 +16,21 @@ const DEFAULT_BASE_URL = 'http://localhost:3001'
  * Handles cases where URL is provided without http:// or https://
  */
 function normalizeBaseUrl(url: string): string {
-  // If already has protocol, return as is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url
+  let normalized = url
+
+  // If already has protocol, use as is
+  if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+    // Keep as is
+  } else if (normalized.includes('localhost') || normalized.includes('127.0.0.1')) {
+    // For localhost or 127.0.0.1, default to http
+    normalized = `http://${normalized}`
+  } else {
+    // For production domains, default to https
+    normalized = `https://${normalized}`
   }
-  
-  // For localhost or 127.0.0.1, default to http
-  if (url.includes('localhost') || url.includes('127.0.0.1')) {
-    return `http://${url}`
-  }
-  
-  // For production domains, default to https
-  return `https://${url}`
+
+  // Remove trailing slash to prevent double slashes in URLs
+  return normalized.replace(/\/$/, '')
 }
 
 export class Tessera {
