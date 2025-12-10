@@ -13,7 +13,8 @@ const PORT = process.env.PORT || 3001
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || '*', // Allow all origins in dev, restrict in production
+    // origin: process.env.CORS_ORIGIN || '*', // Allow all origins in dev, restrict in production
+    origin:  '*', // Allow all origins in dev, restrict in production
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-PAYMENT'],
