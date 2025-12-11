@@ -1,8 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Plus } from "lucide-react"
 import { cn } from "@/shared/utils/utils"
+import { Button } from "@/src/shared/components/shadcn/button"
+import { useRouter } from "next/navigation"
 
 interface OverviewCardProps {
   title: string
@@ -25,6 +27,8 @@ export function OverviewCard({
   isEmpty,
   emptyMessage = "No data available",
 }: OverviewCardProps) {
+
+  const router = useRouter()
   return (
     <div className={cn("bg-card border rounded-lg p-6 shadow-sm flex flex-col transition-all hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30", className)}>
       <div className="flex items-start justify-between mb-4">
@@ -33,6 +37,14 @@ export function OverviewCard({
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
         {viewAllHref && (
+          <>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => {
+           router.push("/publishers/new")
+          }}>
+            <Plus className="size-4" />
+            Add Publisher
+          </Button>
           <Link
             href={viewAllHref}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group"
@@ -40,6 +52,8 @@ export function OverviewCard({
             View All
             <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
           </Link>
+        </div>
+          </>
         )}
       </div>
 
