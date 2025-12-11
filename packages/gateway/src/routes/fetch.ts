@@ -35,8 +35,9 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
     if (!endpointInfo) {
       res.status(404).json({
         error: 'Publisher not found',
-        message: `This publisher (${parsedUrl.hostname}) is not integrated with Tessera yet.`,
-        hostname: parsedUrl.hostname
+        message: `This publisher (${parsedUrl.hostname}) is not integrated with Tessera yet. The publisher may need to be approved and have an endpoint configured.`,
+        hostname: parsedUrl.hostname,
+        hint: 'Check if the publisher exists in the database and has an active endpoint configured.'
       })
       return
     }
@@ -72,7 +73,10 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
     // Payment successful - fetch content from publisher's API
     // Replace :id, :slug, :doi placeholders with extracted values from URL
     const articleId = parsedUrl.pathname.split('/').filter(Boolean).pop() || 'default'
-    const publisherApiUrl = endpointInfo.path.replace(':id', articleId)
+    console.log(`[FETCH] Article ID: ${articleId}`)
+    // Remove /tessera prefix if present in the path
+    const cleanPath = endpointInfo.path.replace(/^\/tessera/, '')
+    const publisherApiUrl = cleanPath.replace(':id', articleId)
       .replace(':slug', articleId)
       .replace(':doi', articleId)
 
@@ -81,7 +85,7 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
     // Call publisher's API with Tessera auth key
     const publisherResponse = await fetch(publisherApiUrl, {
       headers: {
-        'X-Tessera-Key': process.env.PUBLISHER_TESSERA_KEY || 'demo-tessera-key'
+        'X-Tessera-Key': process.env.PUBLISHER_TESSERA_KEY || 'demo-tessera-key-for-publisher-auth'
       }
     })
 
