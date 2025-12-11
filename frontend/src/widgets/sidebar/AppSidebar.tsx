@@ -9,9 +9,11 @@ import { TerminalIcon, type TerminalIconHandle } from "@/shared/components/anima
 import { KeyIcon, type KeyIconHandle } from "@/shared/components/animated-icons/key"
 import { ActivityIcon, type ActivityIconHandle } from "@/shared/components/animated-icons/activity"
 import { SlidersHorizontalIcon, type SlidersHorizontalIconHandle } from "@/shared/components/animated-icons/sliders-horizontal"
+import { GlobeIcon, type GlobeIconHandle } from "@/shared/components/animated-icons/globe"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -20,6 +22,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/shared/components/shadcn/sidebar"
+import { ThemeToggle } from "@/shared/components/ThemeToggle"
 
 const mainNavItems = [
   {
@@ -41,6 +44,11 @@ const bottomNavItems = [
     icon: KeyIcon,
   },
   {
+    title: "Publishers",
+    url: "/publishers",
+    icon: GlobeIcon,
+  },
+  {
     title: "Activity",
     url: "/dashboard/activity",
     icon: ActivityIcon,
@@ -52,7 +60,7 @@ const bottomNavItems = [
   // },
 ]
 
-type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | ActivityIconHandle | SlidersHorizontalIconHandle
+type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | ActivityIconHandle | SlidersHorizontalIconHandle | GlobeIconHandle
 
 function AnimatedMenuItem({
   item,
@@ -142,6 +150,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex items-center justify-between px-2 py-1">
+              <span className="text-xs text-muted-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }

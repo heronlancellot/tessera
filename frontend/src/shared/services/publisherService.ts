@@ -44,4 +44,36 @@ export const publisherService = {
 
     return counts
   },
+
+  async createPublisher (publisher: Publisher): Promise<Publisher> {
+    const { data, error } = await supabase
+      .from("publishers")
+      .insert(publisher)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+
+ async updatePublisher (publisher: Publisher): Promise<Publisher> {
+    const { data, error } = await supabase
+      .from("publishers")
+      .update(publisher)
+      .eq("id", publisher.id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  },
+
+  async deletePublisher (id: string): Promise<void> {
+    const { error } = await supabase
+      .from("publishers")
+      .delete()
+      .eq("id", id)
+    if (error) throw error
+  },
+  
 }

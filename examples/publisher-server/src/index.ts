@@ -21,8 +21,14 @@ app.get('/tessera/articles/:id', (req, res) => {
 
   // Simulate authentication (in real scenario, Tessera would have a secret key)
   const tesseraKey = req.headers['x-tessera-key']
+  const validKey = process.env.PUBLISHER_TESSERA_KEY || 'demo-tessera-key-for-publisher-auth'
+
   if (!tesseraKey) {
     return res.status(401).json({ error: 'Missing X-Tessera-Key header' })
+  }
+
+  if (tesseraKey !== validKey) {
+    return res.status(401).json({ error: 'Invalid X-Tessera-Key' })
   }
 
   // Return premium article content (no paywall for Tessera partners)

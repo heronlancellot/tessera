@@ -1,8 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
 import { Globe } from "lucide-react"
-import Link from "next/link"
 import { useActiveAccount } from "thirdweb/react"
 import { usePublishers } from "@/shared/hooks/usePublishers"
 import { OverviewCard } from "./OverviewCard"
@@ -39,7 +39,7 @@ export function PublishersCard() {
     <OverviewCard
       title="Publishers"
       description="Available paywalls"
-      viewAllHref="/dashboard/publishers"
+      viewAllHref="/publishers"
       isLoading={isLoading}
       isEmpty={publishers.length === 0}
       emptyMessage="No publishers available"

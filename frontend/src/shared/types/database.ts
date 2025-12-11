@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -136,33 +141,45 @@ export type Database = {
       }
       publishers: {
         Row: {
+          contract_address: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
           logo_url: string | null
           name: string
           slug: string
+          status: Database["public"]["Enums"]["publisher_status"] | null
+          submitted_at: string | null
           updated_at: string | null
+          wallet_address: string | null
           website: string | null
         }
         Insert: {
+          contract_address?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
           name: string
           slug: string
+          status?: Database["public"]["Enums"]["publisher_status"] | null
+          submitted_at?: string | null
           updated_at?: string | null
+          wallet_address?: string | null
           website?: string | null
         }
         Update: {
+          contract_address?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
           name?: string
           slug?: string
+          status?: Database["public"]["Enums"]["publisher_status"] | null
+          submitted_at?: string | null
           updated_at?: string | null
+          wallet_address?: string | null
           website?: string | null
         }
         Relationships: []
@@ -350,6 +367,7 @@ export type Database = {
       }
     }
     Enums: {
+      publisher_status: "pending" | "approved" | "rejected"
       request_status: "pending" | "completed" | "failed"
       request_type: "preview" | "fetch"
     }
@@ -482,9 +500,9 @@ export const Constants = {
   },
   public: {
     Enums: {
+      publisher_status: ["pending", "approved", "rejected"],
       request_status: ["pending", "completed", "failed"],
       request_type: ["preview", "fetch"],
     },
   },
 } as const
-
