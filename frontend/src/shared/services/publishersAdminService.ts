@@ -79,7 +79,8 @@ class PublishersAdminService {
       throw new Error(error.error || `HTTP ${response.status}`)
     }
 
-    return response.json()
+    const data = await response.json()
+    return data.publisher
   }
 
   /**

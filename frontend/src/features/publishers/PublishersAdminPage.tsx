@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
+import { useActiveAccount } from "thirdweb/react"
 import { fadeInVariants } from "@/shared/utils/animations"
 import { BaseLayout } from "@/shared/components/layouts/BaseLayout"
 import { PageHeader } from "@/shared/components/ui"
@@ -9,15 +10,18 @@ import { PublishersAdminFilters } from "./components/PublishersAdminFilters"
 import { PublishersAdminTable } from "./components/PublishersAdminTable"
 import { usePublishersAdmin } from "./hooks/usePublishersAdmin"
 import type { PublisherStatus } from "@/shared/services/publishersAdminService"
+import { createFeeSplitter } from "@/shared/services/contracts/createFeeSplitter"
+import { toast } from "@/shared/utils/toast"
 
 export function PublishersAdminPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<PublisherStatus | "all">("all")
+  const account = useActiveAccount()
 
   // Build filters for API
   const apiFilters = useMemo(() => {
     const filters: { status?: PublisherStatus; is_active?: boolean } = {}
-    
+
     if (statusFilter !== "all") {
       filters.status = statusFilter
     }
@@ -25,7 +29,7 @@ export function PublishersAdminPage() {
     return filters
   }, [statusFilter])
 
-  const { publishers, isLoading, approvePublisher, rejectPublisher } = usePublishersAdmin(apiFilters)
+  const { publishers, isLoading, rejectPublisher } = usePublishersAdmin(apiFilters)
 
   // Filter by search term
   const filteredPublishers = useMemo(
@@ -41,7 +45,25 @@ export function PublishersAdminPage() {
   )
 
   const handleApprove = async (id: string) => {
-    await approvePublisher(id)
+    if (!account) {
+      toast.error("Wallet not connected", "Please connect your wallet to approve publishers")
+      return
+    }
+
+    try {
+      // Create fee splitter contract and approve publisher
+      await createFeeSplitter({
+        publisherId: id,
+        account,
+      })
+
+      // Refresh the publishers list
+      // The approvePublisher is already called inside createFeeSplitter
+      // so we don't need to call it again here
+    } catch (error) {
+      // Error is already handled in createFeeSplitter
+      console.error("Failed to approve publisher:", error)
+    }
   }
 
   const handleReject = async (id: string) => {
