@@ -2,6 +2,7 @@
 
 import { createThirdwebClient } from "thirdweb"
 import { ConnectButton, useActiveAccount } from "thirdweb/react"
+import { createWallet } from "thirdweb/wallets"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { avalancheFuji } from "thirdweb/chains"
@@ -12,6 +13,14 @@ import { toast } from "@/shared/utils/toast"
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
 })
+
+// Configure wallets - apenas wallets Web3, sem login social
+const wallets = [
+  createWallet("io.metamask"),
+  createWallet("com.coinbase.wallet"),
+  createWallet("me.rainbow"),
+  createWallet("com.trustwallet.app"),
+]
 
 export function LoginPage() {
   const account = useActiveAccount()
@@ -85,9 +94,13 @@ export function LoginPage() {
           </p>
         </div>
 
-        {/* Connect Button */}
+        {/* Connect Button - apenas wallets Web3, sem login social */}
         <div className="mt-8">
-          <ConnectButton client={client} chain={avalancheFuji} />
+          <ConnectButton 
+            client={client} 
+            chain={avalancheFuji}
+            wallets={wallets}
+          />
         </div>
 
       </div>
