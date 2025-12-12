@@ -16,7 +16,7 @@ import { ApiKeysTable } from "./components/ApiKeysTable"
 import { ApiKeyForm } from "./components/ApiKeyForm"
 import { NewKeyModal } from "./components/NewKeyModal"
 import { useApiKeys } from "./hooks/useApiKeys"
-import { toast } from "@/src/shared/utils/toast"
+import { toast} from "sonner"
 
 export function ApiKeysPage() {
   const account = useActiveAccount()
@@ -64,7 +64,7 @@ export function ApiKeysPage() {
 
   const handleSubmit = async () => {
     if (!keyName.trim()) return
-    toast.loading("Creating API key...")
+    toast.info("Creating API key...")
     setIsSubmitting(true)
     try {
       const newKey = await createKey(keyName, keyExpiration)
