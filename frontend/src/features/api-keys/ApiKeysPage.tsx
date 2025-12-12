@@ -20,10 +20,12 @@ import { toast} from "sonner"
 
 export function ApiKeysPage() {
   const account = useActiveAccount()
+  console.log("account22", account)
+  if (!account) return toast.error("No account found")
 
   // API Keys data & operations
   const { apiKeys, isLoading, createKey, deleteKey, hideFullToken } = useApiKeys({
-    walletAddress: account?.address,
+    walletAddress: account.address,
   })
 
   // Local UI state

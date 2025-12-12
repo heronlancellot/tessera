@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/shadcn/select"
+import { toast } from "sonner"
 
 interface SDKDrawerProps {
   isOpen: boolean
@@ -60,7 +61,8 @@ curl "${env.gatewayUrl}/fetch?url=https://example.com/article" \\
 
 export function SDKDrawer({ isOpen, onClose }: SDKDrawerProps) {
   const account = useActiveAccount()
-  const { apiKeys, isLoading } = useApiKeys({ walletAddress: account?.address })
+  if (!account) return toast.error("No account found")
+  const { apiKeys, isLoading } = useApiKeys({ walletAddress: account.address })
   const [selectedApiKeyId, setSelectedApiKeyId] = useState<string>("")
   const [selectedLanguage, setSelectedLanguage] = useState("js")
   const [copied, setCopied] = useState(false)
