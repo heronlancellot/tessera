@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
         .insert({
           user_id: authUser.id,
           wallet_address: normalizedAddress,
+          role: "user",
         })
         .select()
         .single()
