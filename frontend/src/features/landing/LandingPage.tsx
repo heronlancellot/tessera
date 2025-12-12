@@ -1,6 +1,6 @@
 "use client";
 
-import { LandingHeader, LandingHero, LandingAbout, LandingBenefits, LandingFooter, AnimatedBackground } from "./components";
+import { LandingHeader, LandingHero, LandingAbout, LandingBenefits, LandingRoadmap, LandingFooter, AnimatedBackground } from "./components";
 
 export function LandingPage() {
   return (
@@ -12,6 +12,7 @@ export function LandingPage() {
         <LandingHero />
         <LandingAbout />
         <LandingBenefits />
+        <LandingRoadmap />
       </main>
 
       <LandingFooter />
