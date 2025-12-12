@@ -60,62 +60,62 @@ export async function POST(request: NextRequest) {
 
     // First, try to find existing user in public.users by wallet_address or user_id
     // Use ilike for case-insensitive wallet address comparison
-    // const { data: existingPublicUser } = await supabaseAdmin
-    //   .from("users")
-    //   .select()
-    //   .or(`wallet_address.ilike.${normalizedAddress},user_id.eq.${authUser.id}`)
-    //   .maybeSingle()
+    const { data: existingPublicUser } = await supabaseAdmin
+      .from("users")
+      .select()
+      .or(`wallet_address.ilike.${normalizedAddress},user_id.eq.${authUser.id}`)
+      .maybeSingle()
 
-    // let publicUser
+    let publicUser
 
-    // if (existingPublicUser) {
-    //   // Update existing user
-    //   const { data: updatedUser, error: updateError } = await supabaseAdmin
-    //     .from("users")
-    //     .update({
-    //       user_id: authUser.id,
-    //       wallet_address: normalizedAddress,
-    //     })
-    //     .eq("id", existingPublicUser.id)
-    //     .select()
-    //     .single()
+    if (existingPublicUser) {
+      // Update existing user
+      const { data: updatedUser, error: updateError } = await supabaseAdmin
+        .from("users")
+        .update({
+          user_id: authUser.id,
+          wallet_address: normalizedAddress,
+        })
+        .eq("id", existingPublicUser.id)
+        .select()
+        .single()
 
-    //   if (updateError) {
-    //     logger.error("Failed to update public user", {
-    //       error: updateError,
-    //       code: updateError.code,
-    //       message: updateError.message,
-    //       existingUserId: existingPublicUser.id
-    //     })
-    //     return NextResponse.json({ error: "Failed to update user data" }, { status: 500 })
-    //   }
+      if (updateError) {
+        logger.error("Failed to update public user", {
+          error: updateError,
+          code: updateError.code,
+          message: updateError.message,
+          existingUserId: existingPublicUser.id
+        })
+        return NextResponse.json({ error: "Failed to update user data" }, { status: 500 })
+      }
 
-    //   publicUser = updatedUser
-    // } else {
-    //   // Insert new user
-    //   const { data: newUser, error: insertError } = await supabaseAdmin
-    //     .from("users")
-    //     .insert({
-    //       user_id: authUser.id,
-    //       wallet_address: normalizedAddress,
-    //       role: "user",
-    //     })
-    //     .select()
-    //     .single()
+      publicUser = updatedUser
+    } else {
+      // Insert new user
+      const { data: newUser, error: insertError } = await supabaseAdmin
+        .from("users")
+        .insert({
+          user_id: authUser.id,
+          wallet_address: normalizedAddress,
+          role: "user",
+        })
+        .select()
+        .single()
 
-    //   if (insertError) {
-    //     logger.error("Failed to insert public user", {
-    //       error: insertError,
-    //       code: insertError.code,
-    //       message: insertError.message,
-    //       authUserId: authUser.id,
-    //       walletAddress: normalizedAddress
-    //     })
-    //     return NextResponse.json({ error: "Failed to create user data", insertError }, { status: 500 })
-    //   }
+      if (insertError) {
+        logger.error("Failed to insert public user", {
+          error: insertError,
+          code: insertError.code,
+          message: insertError.message,
+          authUserId: authUser.id,
+          walletAddress: normalizedAddress
+        })
+        return NextResponse.json({ error: "Failed to create user data", insertError }, { status: 500 })
+      }
 
-    //   publicUser = newUser
-    // }
+      publicUser = newUser
+    }
 
     // Generate a session for the user using a custom JWT
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
