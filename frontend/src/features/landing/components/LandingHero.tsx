@@ -10,23 +10,23 @@ const fadeInUp = {
 
 export function LandingHero() {
   return (
-    <section className="flex min-h-screen items-center justify-center pb-4">
+    <section className="flex min-h-screen items-center justify-center px-4 pb-4 sm:px-6 md:px-8">
       <div className="text-center">
         <motion.h1
-          className="mb-6"
+          className="mb-4 sm:mb-6"
           initial="initial"
           animate="animate"
           transition={{ staggerChildren: 0.2 }}
         >
           <motion.span
-            className="block font-besley text-[64px] italic leading-tight text-white"
+            className="block font-besley text-[40px] italic leading-tight text-white sm:text-[52px] md:text-[64px]"
             variants={fadeInUp}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             Unlock more.
           </motion.span>
           <motion.span
-            className="block font-be-vietnam text-[64px] font-extrabold leading-tight text-white"
+            className="block font-be-vietnam text-[40px] font-extrabold leading-tight text-white sm:text-[52px] md:text-[64px]"
             variants={fadeInUp}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
@@ -35,7 +35,7 @@ export function LandingHero() {
         </motion.h1>
 
         <motion.p
-          className="mx-auto mb-8 max-w-2xl font-be-vietnam text-[16px] font-light leading-relaxed text-white/90"
+          className="mx-auto mb-6 max-w-2xl px-4 font-be-vietnam text-[14px] font-light leading-relaxed text-white/90 sm:mb-8 sm:text-[16px]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
@@ -71,7 +71,7 @@ export function LandingHero() {
           >
             <Link
               href="/login"
-              className="inline-block px-8 py-3 font-be-vietnam text-sm font-medium uppercase tracking-wide text-white transition-all hover:opacity-90"
+              className="inline-block px-6 py-2.5 font-be-vietnam text-xs font-medium uppercase tracking-wide text-white transition-all hover:opacity-90 sm:px-8 sm:py-3 sm:text-sm"
               style={{
                 background: 'linear-gradient(-73deg, rgba(210, 171, 103, 0.6) 15%, rgba(75, 118, 121, 1) 89%)',
               }}
