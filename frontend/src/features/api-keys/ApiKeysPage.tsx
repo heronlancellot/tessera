@@ -64,7 +64,7 @@ export function ApiKeysPage() {
 
   const handleSubmit = async () => {
     if (!keyName.trim()) return
-    toast.loading("Creating API key...")
+    toast.info("Creating API key...")
     setIsSubmitting(true)
     try {
       const newKey = await createKey(keyName, keyExpiration)
