@@ -11,16 +11,22 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedAddress = walletAddress.toLowerCase()
+    console.log("normalizedAddress", normalizedAddress)
 
     // Check if user already exists in auth.users by wallet address metadata
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+    console.log("existingUsers", existingUsers)
     const existingAuthUser = existingUsers?.users.find(
-      (u) => u.user_metadata?.wallet_address === normalizedAddress
+      (u) => { console.log("u", u); return u.user_metadata?.wallet_address.toLowerCase() === normalizedAddress}
     )
+
+
+    console.log("existingAuthUser", existingAuthUser)
 
     let authUser = existingAuthUser
 
     if (!authUser) {
+      console.log("Creating new user")
       // Create new user in auth.users
       const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: `${normalizedAddress}@wallet.tessera.local`,
@@ -54,133 +60,133 @@ export async function POST(request: NextRequest) {
 
     // First, try to find existing user in public.users by wallet_address or user_id
     // Use ilike for case-insensitive wallet address comparison
-    const { data: existingPublicUser } = await supabaseAdmin
-      .from("users")
-      .select()
-      .or(`wallet_address.ilike.${normalizedAddress},user_id.eq.${authUser.id}`)
-      .maybeSingle()
+    // const { data: existingPublicUser } = await supabaseAdmin
+    //   .from("users")
+    //   .select()
+    //   .or(`wallet_address.ilike.${normalizedAddress},user_id.eq.${authUser.id}`)
+    //   .maybeSingle()
 
-    let publicUser
+    // let publicUser
 
-    if (existingPublicUser) {
-      // Update existing user
-      const { data: updatedUser, error: updateError } = await supabaseAdmin
-        .from("users")
-        .update({
-          user_id: authUser.id,
-          wallet_address: normalizedAddress,
-        })
-        .eq("id", existingPublicUser.id)
-        .select()
-        .single()
+    // if (existingPublicUser) {
+    //   // Update existing user
+    //   const { data: updatedUser, error: updateError } = await supabaseAdmin
+    //     .from("users")
+    //     .update({
+    //       user_id: authUser.id,
+    //       wallet_address: normalizedAddress,
+    //     })
+    //     .eq("id", existingPublicUser.id)
+    //     .select()
+    //     .single()
 
-      if (updateError) {
-        logger.error("Failed to update public user", {
-          error: updateError,
-          code: updateError.code,
-          message: updateError.message,
-          existingUserId: existingPublicUser.id
-        })
-        return NextResponse.json({ error: "Failed to update user data" }, { status: 500 })
-      }
+    //   if (updateError) {
+    //     logger.error("Failed to update public user", {
+    //       error: updateError,
+    //       code: updateError.code,
+    //       message: updateError.message,
+    //       existingUserId: existingPublicUser.id
+    //     })
+    //     return NextResponse.json({ error: "Failed to update user data" }, { status: 500 })
+    //   }
 
-      publicUser = updatedUser
-    } else {
-      // Insert new user
-      const { data: newUser, error: insertError } = await supabaseAdmin
-        .from("users")
-        .insert({
-          user_id: authUser.id,
-          wallet_address: normalizedAddress,
-          role: "user",
-        })
-        .select()
-        .single()
+    //   publicUser = updatedUser
+    // } else {
+    //   // Insert new user
+    //   const { data: newUser, error: insertError } = await supabaseAdmin
+    //     .from("users")
+    //     .insert({
+    //       user_id: authUser.id,
+    //       wallet_address: normalizedAddress,
+    //       role: "user",
+    //     })
+    //     .select()
+    //     .single()
 
-      if (insertError) {
-        logger.error("Failed to insert public user", {
-          error: insertError,
-          code: insertError.code,
-          message: insertError.message,
-          authUserId: authUser.id,
-          walletAddress: normalizedAddress
-        })
-        return NextResponse.json({ error: "Failed to create user data" }, { status: 500 })
-      }
+    //   if (insertError) {
+    //     logger.error("Failed to insert public user", {
+    //       error: insertError,
+    //       code: insertError.code,
+    //       message: insertError.message,
+    //       authUserId: authUser.id,
+    //       walletAddress: normalizedAddress
+    //     })
+    //     return NextResponse.json({ error: "Failed to create user data", insertError }, { status: 500 })
+    //   }
 
-      publicUser = newUser
-    }
+    //   publicUser = newUser
+    // }
 
     // Generate a session for the user using a custom JWT
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email: authUser.email!,
-    })
+    // const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+    //   type: "magiclink",
+    //   email: authUser.email!,
+    // })
 
-    if (sessionError) {
-      logger.error("Failed to generate link", sessionError)
-    }
+    // if (sessionError) {
+    //   logger.error("Failed to generate link", sessionError)
+    // }
 
     // Extract token from the magic link URL to create a session
-    let accessToken = null
-    let refreshToken = null
+    // let accessToken = null
+    // let refreshToken = null
 
-    if (sessionData?.properties?.hashed_token) {
-      // Verify the token to get a proper session
-      const { data: verifyData, error: verifyError } = await supabaseAdmin.auth.admin.getUserById(authUser.id)
+    // if (sessionData?.properties?.hashed_token) {
+    //   // Verify the token to get a proper session
+    //   const { data: verifyData, error: verifyError } = await supabaseAdmin.auth.admin.getUserById(authUser.id)
 
-      if (!verifyError && verifyData) {
-        // Generate session tokens directly
-        const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-          email: authUser.email!,
-          password: normalizedAddress, // Use wallet address as password
-        }).catch(() => ({ data: { session: null }, error: { message: "Password not set" } }))
+    //   if (!verifyError && verifyData) {
+    //     // Generate session tokens directly
+    //     const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+    //       email: authUser.email!,
+    //       password: normalizedAddress, // Use wallet address as password
+    //     }).catch(() => ({ data: { session: null }, error: { message: "Password not set" } }))
 
-        if (session) {
-          accessToken = session.access_token
-          refreshToken = session.refresh_token
-        }
-      }
-    }
+    //     if (session) {
+    //       accessToken = session.access_token
+    //       refreshToken = session.refresh_token
+    //     }
+    //   }
+    // }
 
     // If we couldn't get a session via password, the user needs to set one
     // For now, we'll update the user to have a password based on wallet address
-    if (!accessToken) {
-      // Set password for the user
-      await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
-        password: normalizedAddress,
-      })
+    // if (!accessToken) {
+    //   // Set password for the user
+    //   await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+    //     password: normalizedAddress,
+    //   })
 
-      // Now sign in with the password
-      const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-        email: authUser.email!,
-        password: normalizedAddress,
-      })
+    //   // Now sign in with the password
+    //   const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+    //     email: authUser.email!,
+    //     password: normalizedAddress,
+    //   })
 
-      if (signInError) {
-        logger.error("Failed to sign in user", signInError)
-        return NextResponse.json({
-          user: publicUser,
-          authUser: {
-            id: authUser.id,
-            email: authUser.email,
-          },
-        })
-      }
+    //   if (signInError) {
+    //     logger.error("Failed to sign in user", signInError)
+    //     return NextResponse.json({
+    //       user: publicUser,
+    //       authUser: {
+    //         id: authUser.id,
+    //         email: authUser.email,
+    //       },
+    //     })
+    //   }
 
-      accessToken = session?.access_token
-      refreshToken = session?.refresh_token
-    }
+    //   accessToken = session?.access_token
+    //   refreshToken = session?.refresh_token
+    // }
 
     return NextResponse.json({
-      user: publicUser,
+      user: authUser,
       authUser: {
         id: authUser.id,
         email: authUser.email,
       },
       session: {
-        access_token: accessToken,
-        refresh_token: refreshToken,
+        access_token: authUser.user_metadata?.access_token,
+        refresh_token: authUser.user_metadata?.refresh_token,
       },
     })
   } catch (error) {

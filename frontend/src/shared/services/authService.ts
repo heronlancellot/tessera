@@ -17,20 +17,17 @@ export const authService = {
       return null
     }
 
-    const response = await fetch("/api/auth/wallet", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ walletAddress }),
-    })
+    try {
+      console.log("walletAddress", walletAddress)
+      const response = await fetch("/api/auth/wallet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress }),
+      })
+      const data = await response.json()
+      console.log("dat2222a", data)
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || "Failed to authenticate wallet")
-    }
-
-    const data = await response.json()
-
-    // Set session in Supabase client for RLS to work
+       // Set session in Supabase client for RLS to work
     if (data.session?.access_token && data.session?.refresh_token) {
       await supabase.auth.setSession({
         access_token: data.session.access_token,
@@ -39,7 +36,16 @@ export const authService = {
       logger.debug("Supabase session set successfully")
     }
 
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to authenticate wallet")
+    }
+    
     return data.user
+  
+    } catch (error) {
+
+      throw new Error((error as Error).message || "Failed to authenticate wallet")
+    }
   },
 
   /**
