@@ -23,6 +23,7 @@ import {
   SidebarSeparator,
 } from "@/shared/components/shadcn/sidebar"
 import { ThemeToggle } from "@/shared/components/ThemeToggle"
+import { useUser } from "@/shared/hooks/useUser"
 
 const mainNavItems = [
   {
@@ -104,6 +105,7 @@ function AnimatedMenuItem({
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const { isAdmin } = useUser()
 
   return (
     <Sidebar {...props}>
@@ -152,20 +154,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarSeparator className="mx-0" />
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {publishersNavItems.map((item) => (
-                <AnimatedMenuItem
-                  key={item.title}
-                  item={item}
-                  isActive={pathname === item.url}
-                />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isAdmin && (
+          <>
+            <SidebarSeparator className="mx-0" />
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {publishersNavItems.map((item) => (
+                    <AnimatedMenuItem
+                      key={item.title}
+                      item={item}
+                      isActive={pathname === item.url}
+                    />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

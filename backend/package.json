@@ -10,7 +10,8 @@
     "db:new": "npx supabase migration new",
     "db:status": "npx supabase status",
     "db:env": "npx supabase status -o env",
-    "db:types": "npx supabase gen types typescript --local > ../frontend/src/shared/types/database.ts"
+    "db:types": "npx supabase gen types typescript --local > ../frontend/src/shared/types/database.ts",
+    "db:types:remote": "npx supabase gen types typescript --project-id bjuaxwdcsirvcjsoyxug > ../frontend/src/shared/types/database.ts"
   },
   "devDependencies": {
     "supabase": "^2.65.6"
