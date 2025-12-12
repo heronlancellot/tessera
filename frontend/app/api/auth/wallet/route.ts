@@ -58,13 +58,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // First, try to find existing user in public.users by wallet_address or user_id
-    // Use ilike for case-insensitive wallet address comparison
-    const { data: existingPublicUser } = await supabaseAdmin
+    // First, try to find existing user in public.users by wallet_address
+    let { data: existingPublicUser } = await supabaseAdmin
       .from("users")
       .select()
-      .or(`wallet_address.ilike.${normalizedAddress},user_id.eq.${authUser.id}`)
+      .eq("wallet_address", normalizedAddress)
       .maybeSingle()
+
+    // If not found by wallet, try by user_id
+    if (!existingPublicUser) {
+      const result = await supabaseAdmin
+        .from("users")
+        .select()
+        .eq("user_id", authUser.id)
+        .maybeSingle()
+      existingPublicUser = result.data
+    }
 
     let publicUser
 
@@ -93,6 +102,7 @@ export async function POST(request: NextRequest) {
       publicUser = updatedUser
     } else {
       // Insert new user
+      logger.debug("Creating new public user", { authUserId: authUser.id, walletAddress: normalizedAddress })
       const { data: newUser, error: insertError } = await supabaseAdmin
         .from("users")
         .insert({
@@ -111,10 +121,11 @@ export async function POST(request: NextRequest) {
           authUserId: authUser.id,
           walletAddress: normalizedAddress
         })
-        return NextResponse.json({ error: "Failed to create user data", insertError }, { status: 500 })
+        return NextResponse.json({ error: "Failed to create user data", details: insertError.message }, { status: 500 })
       }
 
       publicUser = newUser
+      logger.debug("Public user created successfully", { userId: publicUser.id })
     }
 
     // Generate a session for the user using a custom JWT
@@ -166,7 +177,7 @@ export async function POST(request: NextRequest) {
       if (signInError) {
         logger.error("Failed to sign in user", signInError)
         return NextResponse.json({
-          user: authUser,
+          user: publicUser,
           authUser: {
             id: authUser.id,
             email: authUser.email,
@@ -179,14 +190,14 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      user: authUser,
+      user: publicUser,
       authUser: {
         id: authUser.id,
         email: authUser.email,
       },
       session: {
-        access_token: authUser.user_metadata?.access_token,
-        refresh_token: authUser.user_metadata?.refresh_token,
+        access_token: accessToken,
+        refresh_token: refreshToken,
       },
     })
   } catch (error) {
