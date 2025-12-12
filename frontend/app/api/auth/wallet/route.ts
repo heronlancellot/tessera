@@ -53,10 +53,11 @@ export async function POST(request: NextRequest) {
     }
 
     // First, try to find existing user in public.users by wallet_address or user_id
+    // Use ilike for case-insensitive wallet address comparison
     const { data: existingPublicUser } = await supabaseAdmin
       .from("users")
       .select()
-      .or(`wallet_address.eq.${normalizedAddress},user_id.eq.${authUser.id}`)
+      .or(`wallet_address.ilike.${normalizedAddress},user_id.eq.${authUser.id}`)
       .maybeSingle()
 
     let publicUser
