@@ -30,11 +30,11 @@ const mainNavItems = [
     url: "/dashboard",
     icon: HomeIcon,
   },
-  // {
-  //   title: "Playground",
-  //   url: "/dashboard/playground",
-  //   icon: TerminalIcon,
-  // },
+  {
+    title: "Playground",
+    url: "/playground",
+    icon: TerminalIcon,
+  },
 ]
 
 const bottomNavItems = [
@@ -42,11 +42,6 @@ const bottomNavItems = [
     title: "API Keys",
     url: "/dashboard/api-keys",
     icon: KeyIcon,
-  },
-  {
-    title: "Publishers",
-    url: "/publishers",
-    icon: GlobeIcon,
   },
   {
     title: "Activity",
@@ -60,13 +55,21 @@ const bottomNavItems = [
   // },
 ]
 
+const publishersNavItems = [
+  {
+    title: "Publishers",
+    url: "/publishers",
+    icon: GlobeIcon,
+  },
+]
+
 type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | ActivityIconHandle | SlidersHorizontalIconHandle | GlobeIconHandle
 
 function AnimatedMenuItem({
   item,
   isActive
 }: {
-  item: typeof mainNavItems[number] | typeof bottomNavItems[number]
+  item: typeof mainNavItems[number] | typeof bottomNavItems[number] | typeof publishersNavItems[number]
   isActive: boolean
 }) {
   const iconRef = React.useRef<IconHandle>(null)
@@ -140,6 +143,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {bottomNavItems.map((item) => (
+                <AnimatedMenuItem
+                  key={item.title}
+                  item={item}
+                  isActive={pathname === item.url}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarSeparator className="mx-0" />
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {publishersNavItems.map((item) => (
                 <AnimatedMenuItem
                   key={item.title}
                   item={item}

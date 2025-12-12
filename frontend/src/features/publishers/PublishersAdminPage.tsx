@@ -3,9 +3,12 @@
 import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
 import { useActiveAccount } from "thirdweb/react"
+import { useRouter } from "next/navigation"
+import { Plus } from "lucide-react"
 import { fadeInVariants } from "@/shared/utils/animations"
 import { BaseLayout } from "@/shared/components/layouts/BaseLayout"
 import { PageHeader } from "@/shared/components/ui"
+import { Button } from "@/shared/components/shadcn/button"
 import { PublishersAdminFilters } from "./components/PublishersAdminFilters"
 import { PublishersAdminTable } from "./components/PublishersAdminTable"
 import { usePublishersAdmin } from "./hooks/usePublishersAdmin"
@@ -17,6 +20,7 @@ export function PublishersAdminPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<PublisherStatus | "all">("all")
   const account = useActiveAccount()
+  const router = useRouter()
 
   // Build filters for API
   const apiFilters = useMemo(() => {
@@ -29,7 +33,7 @@ export function PublishersAdminPage() {
     return filters
   }, [statusFilter])
 
-  const { publishers, isLoading, rejectPublisher } = usePublishersAdmin(apiFilters)
+  const { publishers, isLoading, rejectPublisher, refresh } = usePublishersAdmin(apiFilters)
 
   // Filter by search term
   const filteredPublishers = useMemo(
@@ -57,9 +61,10 @@ export function PublishersAdminPage() {
         account,
       })
 
-      // Refresh the publishers list
-      // The approvePublisher is already called inside createFeeSplitter
-      // so we don't need to call it again here
+      // Refresh the publishers list to show updated status
+      await refresh()
+
+      toast.success("Publisher approved!", "Fee splitter contract created successfully")
     } catch (error) {
       // Error is already handled in createFeeSplitter
       console.error("Failed to approve publisher:", error)
@@ -81,6 +86,12 @@ export function PublishersAdminPage() {
         <PageHeader
           title="Publishers Management"
           description="Review and manage publisher registrations. Approve or reject publishers to activate their integration with Tessera."
+          action={
+            <Button onClick={() => router.push("/publishers/new")}>
+              <Plus className="size-4" />
+              Add Publisher
+            </Button>
+          }
         />
 
         <PublishersAdminFilters

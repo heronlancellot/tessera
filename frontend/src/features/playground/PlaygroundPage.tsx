@@ -35,9 +35,24 @@ export function PlaygroundPage() {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  // Validation state
+  const [touchedFields, setTouchedFields] = useState({
+    url: false,
+    apiKey: false,
+    privateKey: false,
+  })
+
   const handlePreview = async () => {
+    // Mark fields as touched for validation
+    setTouchedFields((prev) => ({ ...prev, url: true, apiKey: true }))
+
     if (!url.trim()) {
       toast.error("URL is required", "Please enter a URL to preview")
+      return
+    }
+
+    if (!apiKey.trim()) {
+      toast.error("API key required", "Please enter your API key to continue")
       return
     }
 
@@ -65,8 +80,16 @@ export function PlaygroundPage() {
   }
 
   const handleFetch = async () => {
+    // Mark all fields as touched for validation
+    setTouchedFields({ url: true, apiKey: true, privateKey: true })
+
     if (!url.trim()) {
       toast.error("URL is required", "Please enter a URL to fetch")
+      return
+    }
+
+    if (!apiKey.trim()) {
+      toast.error("API key required", "Please enter your API key to continue")
       return
     }
 
@@ -146,25 +169,48 @@ export function PlaygroundPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="apiKey">API Key (Optional)</Label>
+                <Label htmlFor="apiKey" className="flex items-center gap-1">
+                  API Key
+                  <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="apiKey"
                   type="password"
-                  placeholder="Your API key"
+                  placeholder="Paste your API key (tsr_...)"
                   value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  onChange={(e) => {
+                    setApiKey(e.target.value)
+                    setTouchedFields((prev) => ({ ...prev, apiKey: true }))
+                  }}
+                  onBlur={() => setTouchedFields((prev) => ({ ...prev, apiKey: true }))}
+                  className={touchedFields.apiKey && !apiKey.trim() ? "border-destructive" : ""}
                 />
+                {touchedFields.apiKey && !apiKey.trim() && (
+                  <p className="text-xs text-destructive">API key is required</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="privateKey">Private Key (Required for Fetch)</Label>
+                <Label htmlFor="privateKey" className="flex items-center gap-1">
+                  Private Key
+                  <span className="text-destructive">*</span>
+                  <span className="text-xs text-muted-foreground font-normal">(Required for Fetch)</span>
+                </Label>
                 <Input
                   id="privateKey"
                   type="password"
                   placeholder="0x..."
                   value={privateKey}
-                  onChange={(e) => setPrivateKey(e.target.value)}
+                  onChange={(e) => {
+                    setPrivateKey(e.target.value)
+                    setTouchedFields((prev) => ({ ...prev, privateKey: true }))
+                  }}
+                  onBlur={() => setTouchedFields((prev) => ({ ...prev, privateKey: true }))}
+                  className={touchedFields.privateKey && !privateKey.trim() ? "border-destructive" : ""}
                 />
+                {touchedFields.privateKey && !privateKey.trim() && (
+                  <p className="text-xs text-destructive">Private key is required for Fetch operations</p>
+                )}
                 <Alert variant="destructive" className="mt-2">
                   <AlertTriangle className="size-4" />
                   <AlertTitle>Security Warning</AlertTitle>
@@ -175,14 +221,25 @@ export function PlaygroundPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="url">Article URL</Label>
+                <Label htmlFor="url" className="flex items-center gap-1">
+                  Article URL
+                  <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="url"
                   type="url"
                   placeholder="https://publisher.com/article/123"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={(e) => {
+                    setUrl(e.target.value)
+                    setTouchedFields((prev) => ({ ...prev, url: true }))
+                  }}
+                  onBlur={() => setTouchedFields((prev) => ({ ...prev, url: true }))}
+                  className={touchedFields.url && !url.trim() ? "border-destructive" : ""}
                 />
+                {touchedFields.url && !url.trim() && (
+                  <p className="text-xs text-destructive">Article URL is required</p>
+                )}
               </div>
 
               <div className="flex gap-3 pt-2">
