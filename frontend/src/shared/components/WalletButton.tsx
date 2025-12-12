@@ -11,12 +11,14 @@ import {
 } from "@/shared/components/shadcn/dropdown-menu"
 import { useState } from "react"
 import { dropdownVariants, buttonHoverVariants } from "@/shared/utils/animations"
+import { useRouter } from "next/navigation"
 
 export function WalletButton() {
   const account = useActiveAccount()
   const wallet = useActiveWallet()
   const { disconnect } = useDisconnect()
   const [open, setOpen] = useState(false)
+  const router = useRouter()
 
   if (!account) return null
 
@@ -25,6 +27,7 @@ export function WalletButton() {
   const handleDisconnect = () => {
     if (wallet) {
       disconnect(wallet)
+      router.push("/")
     }
   }
 

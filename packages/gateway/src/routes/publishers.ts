@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express'
 import type { Router as RouterType } from 'express'
 import { publisherService } from '../services/publisherService.js'
+import { validateApiKey } from '../middleware/apiKey.js'
+import { requireAdmin } from '../middleware/requireAdmin.js'
 
 export const publishersRouter: RouterType = Router()
 
@@ -155,7 +157,7 @@ publishersRouter.get('/:id', async (req: Request, res: Response) => {
  *   "contract_address": "0xABC..." (optional)
  * }
  */
-publishersRouter.post('/:id/approve', async (req: Request, res: Response) => {
+publishersRouter.post('/:id/approve', validateApiKey(true), requireAdmin(), async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const { contract_address } = req.body
@@ -196,7 +198,7 @@ publishersRouter.post('/:id/approve', async (req: Request, res: Response) => {
  * POST /publishers/:id/reject
  * Reject a publisher (admin endpoint)
  */
-publishersRouter.post('/:id/reject', async (req: Request, res: Response) => {
+publishersRouter.post('/:id/reject', validateApiKey(true), requireAdmin(), async (req: Request, res: Response) => {
   try {
     const { id } = req.params
 

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
 import { useActiveAccount } from "thirdweb/react"
 import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
+import { Plus, ShieldAlert } from "lucide-react"
 import { fadeInVariants } from "@/shared/utils/animations"
 import { BaseLayout } from "@/shared/components/layouts/BaseLayout"
 import { PageHeader } from "@/shared/components/ui"
@@ -15,12 +15,15 @@ import { usePublishersAdmin } from "./hooks/usePublishersAdmin"
 import type { PublisherStatus } from "@/shared/services/publishersAdminService"
 import { createFeeSplitter } from "@/shared/services/contracts/createFeeSplitter"
 import { toast } from "@/shared/utils/toast"
+import { useUserRole } from "@/shared/hooks/useUserRole"
+import { Alert, AlertDescription, AlertTitle } from "@/shared/components/shadcn/alert"
 
 export function PublishersAdminPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<PublisherStatus | "all">("all")
   const account = useActiveAccount()
   const router = useRouter()
+  const { isAdmin, isLoading: roleLoading, role } = useUserRole()
 
   // Build filters for API
   const apiFilters = useMemo(() => {
@@ -75,6 +78,47 @@ export function PublishersAdminPage() {
     await rejectPublisher(id)
   }
 
+  // Show loading while checking role
+  if (roleLoading) {
+    return (
+      <BaseLayout title="Publishers Admin">
+        <div className="flex flex-1 items-center justify-center p-6">
+          <p className="text-muted-foreground">Checking permissions...</p>
+        </div>
+      </BaseLayout>
+    )
+  }
+
+  // Show access denied if not admin
+  if (!isAdmin) {
+    return (
+      <BaseLayout title="Publishers Admin">
+        <motion.div
+          className="flex flex-1 flex-col gap-6 p-6"
+          variants={fadeInVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <PageHeader
+            title="Publishers Management"
+            description="Admin access required"
+          />
+
+          <Alert variant="destructive">
+            <ShieldAlert className="size-4" />
+            <AlertTitle>Access Denied</AlertTitle>
+            <AlertDescription>
+              You need admin privileges to access this page.
+              {role && <span className="block mt-2">Your current role: <strong>{role}</strong></span>}
+              {!account && <span className="block mt-2">Please connect your wallet first.</span>}
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      </BaseLayout>
+    )
+  }
+
+  // Admin users see the full page
   return (
     <BaseLayout title="Publishers Admin">
       <motion.div
