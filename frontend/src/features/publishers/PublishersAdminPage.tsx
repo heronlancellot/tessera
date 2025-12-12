@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
 import { useActiveAccount } from "thirdweb/react"
 import { useRouter } from "next/navigation"
-import { Plus, ShieldAlert } from "lucide-react"
+import { Plus, ShieldAlert, Wallet } from "lucide-react"
 import { fadeInVariants } from "@/shared/utils/animations"
 import { BaseLayout } from "@/shared/components/layouts/BaseLayout"
 import { PageHeader } from "@/shared/components/ui"
@@ -102,6 +102,20 @@ export function PublishersAdminPage() {
           <PageHeader
             title="Publishers Management"
             description="Admin access required"
+            action={
+              <>
+              <div className="flex items-center gap-2">
+              <Button onClick={() => router.push("/publishers/new")}>
+                <Plus className="size-4" />
+                Add Publisher
+              </Button>
+              <Button onClick={() => router.push("/publishers/withdraw")}>
+                <Wallet className="size-4" />
+                Withdraw
+              </Button>
+              </div>
+              </>
+            }
           />
 
           <Alert variant="destructive">

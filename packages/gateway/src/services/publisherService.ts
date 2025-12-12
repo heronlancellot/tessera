@@ -154,20 +154,62 @@ export const publisherService = {
 
   /**
    * Find publisher by wallet address
+   * Normalizes wallet address to lowercase for consistent querying
    */
   async findByWallet(walletAddress: string): Promise<Publisher | null> {
+    // Normalize wallet address to lowercase for consistent querying
+    // Remove any whitespace and ensure it starts with 0x
+    const normalizedAddress = walletAddress.trim().toLowerCase()
+    
+    if (!normalizedAddress.startsWith('0x')) {
+      console.error('[publisherService.findByWallet] Invalid wallet address format:', normalizedAddress)
+      throw new Error('Invalid wallet address format')
+    }
+
+    console.log('[publisherService.findByWallet] Searching for wallet:', normalizedAddress)
+    console.log('[publisherService.findByWallet] Wallet address length:', normalizedAddress.length)
+
+    // Query with exact match (wallet_address in DB is already lowercase)
     const { data, error } = await supabase
       .from('publishers')
       .select('*')
-      .eq('wallet_address', walletAddress)
-      .single()
+      .eq('wallet_address', normalizedAddress)
+      .maybeSingle()
+
+    console.log('[publisherService.findByWallet] Query result:', {
+      hasData: !!data,
+      hasError: !!error,
+      errorCode: error?.code,
+      errorMessage: error?.message,
+      dataId: data?.id,
+      dataWallet: data?.wallet_address
+    })
 
     if (error) {
       if (error.code === 'PGRST116') {
+        // No rows found - this is expected if publisher doesn't exist
+        console.log('[publisherService.findByWallet] Publisher not found (PGRST116) for wallet:', normalizedAddress)
         return null
       }
-      console.error('Error fetching publisher by wallet:', error)
+      console.error('[publisherService.findByWallet] Error fetching publisher by wallet:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
       throw new Error(error.message)
+    }
+
+    if (data) {
+      console.log('[publisherService.findByWallet] ✅ Publisher found:', {
+        id: data.id,
+        name: data.name,
+        wallet_address: data.wallet_address,
+        contract_address: data.contract_address,
+        status: data.status
+      })
+    } else {
+      console.log('[publisherService.findByWallet] ❌ Publisher not found for wallet:', normalizedAddress)
     }
 
     return data

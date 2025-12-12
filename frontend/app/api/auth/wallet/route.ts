@@ -59,21 +59,85 @@ export async function POST(request: NextRequest) {
     }
 
     // Use the SECURITY DEFINER function to upsert user (bypasses RLS)
-    const { data: publicUser, error: upsertError } = await supabaseAdmin
+    let { data: publicUser, error: upsertError } = await supabaseAdmin
       .rpc("upsert_wallet_user" as any, {
         wallet_addr: normalizedAddress,
         auth_user_id: authUser.id,
       })
 
     if (upsertError) {
-      logger.error("Failed to upsert public user", {
-        error: upsertError,
-        code: upsertError.code,
-        message: upsertError.message,
-        authUserId: authUser.id,
-        walletAddress: normalizedAddress
-      })
-      return NextResponse.json({ error: "Failed to create user data", details: upsertError.message }, { status: 500 })
+      // If duplicate key error, fetch the existing user instead
+      if (upsertError.code === '23505') {
+        logger.debug("User already exists, fetching existing user", { walletAddress: normalizedAddress })
+
+        // Try to fetch user with case-insensitive search (wallet_address may be stored in different case)
+        // Use ilike for case-insensitive comparison
+        const { data: existingUsers, error: fetchError } = await supabaseAdmin
+          .from('users')
+          .select('*')
+          .ilike('wallet_address', normalizedAddress)
+          .limit(1)
+
+        if (existingUsers && existingUsers.length > 0) {
+          const existingUser = existingUsers[0]
+
+          // Normalize the wallet_address to lowercase to prevent future conflicts
+          // Update user with normalized wallet_address and auth_user_id
+          const updateData: any = {
+            wallet_address: normalizedAddress, // Normalize to lowercase
+            user_id: authUser.id,
+            updated_at: new Date().toISOString()
+          }
+
+          // If user was soft-deleted, restore them
+          if (existingUser.deleted_at) {
+            updateData.deleted_at = null
+          }
+
+          const { data: updatedUser, error: updateError } = await supabaseAdmin
+            .from('users')
+            .update(updateData)
+            .eq('id', existingUser.id)
+            .select()
+            .single()
+
+          if (updateError) {
+            logger.error("Failed to update existing user", {
+              updateError,
+              userId: existingUser.id,
+              walletAddress: normalizedAddress
+            })
+            // Fallback to existing user data if update fails
+            publicUser = existingUser
+          } else {
+            publicUser = updatedUser || existingUser
+            logger.debug(existingUser.deleted_at ? "Restored soft-deleted user" : "Found and updated existing user", { 
+              userId: existingUser.id,
+              walletAddressNormalized: normalizedAddress
+            })
+          }
+        } else {
+          logger.error("Failed to fetch existing user after duplicate key error", {
+            fetchError,
+            walletAddress: normalizedAddress,
+            errorCode: upsertError.code,
+            errorMessage: upsertError.message
+          })
+          return NextResponse.json({ 
+            error: "Failed to create user data",
+            details: "User exists but could not be retrieved. This may indicate a data inconsistency."
+          }, { status: 500 })
+        }
+      } else {
+        logger.error("Failed to upsert public user", {
+          error: upsertError,
+          code: upsertError.code,
+          message: upsertError.message,
+          authUserId: authUser.id,
+          walletAddress: normalizedAddress
+        })
+        return NextResponse.json({ error: "Failed to create user data", details: upsertError.message }, { status: 500 })
+      }
     }
 
     if (!publicUser) {
