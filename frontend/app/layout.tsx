@@ -4,6 +4,8 @@ import { ThirdwebProvider } from "thirdweb/react";
 import { Toaster } from "@/shared/components/shadcn/sonner";
 import { TOAST_CONFIG } from "@/shared/config/toast.config";
 import { Urbanist, Be_Vietnam_Pro } from "next/font/google";
+import { ThemeProvider } from "@/shared/providers/ThemeProvider";
+import { ReactNode } from "react";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
@@ -24,15 +26,22 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${urbanist.variable} ${beVietnam.variable}`}>
-        <ThirdwebProvider>
-          {children}
-          <Toaster {...TOAST_CONFIG} closeButton />
-        </ThirdwebProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ThirdwebProvider>
+            {children}
+            <Toaster {...TOAST_CONFIG} closeButton />
+          </ThirdwebProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

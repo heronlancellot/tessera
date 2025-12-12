@@ -13,6 +13,7 @@ interface OverviewCardProps {
   isLoading?: boolean
   isEmpty?: boolean
   emptyMessage?: string
+  actionButton?: React.ReactNode
 }
 
 export function OverviewCard({
@@ -24,6 +25,7 @@ export function OverviewCard({
   isLoading,
   isEmpty,
   emptyMessage = "No data available",
+  actionButton,
 }: OverviewCardProps) {
   return (
     <div className={cn("bg-card border rounded-lg p-6 shadow-sm flex flex-col transition-all hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30", className)}>
@@ -32,14 +34,19 @@ export function OverviewCard({
           <h3 className="font-semibold mb-1">{title}</h3>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-        {viewAllHref && (
-          <Link
-            href={viewAllHref}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group"
-          >
-            View All
-            <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+        {(viewAllHref || actionButton) && (
+          <div className="flex items-center gap-2">
+            {actionButton}
+            {viewAllHref && (
+              <Link
+                href={viewAllHref}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group"
+              >
+                View All
+                <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            )}
+          </div>
         )}
       </div>
 

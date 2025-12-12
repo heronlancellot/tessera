@@ -5,6 +5,7 @@ import express from 'express'
 import cors from 'cors'
 import { previewRouter } from './routes/preview.js'
 import { fetchRouter } from './routes/fetch.js'
+import { publishersRouter } from './routes/publishers.js'
 import { validateApiKey } from './middleware/apiKey.js'
 
 const app = express()
@@ -33,10 +34,16 @@ app.get('/health', (_, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+// Public routes (no API key required)
+import { Router } from 'express'
+const publicRouter = Router()
+publicRouter.use('/publishers', publishersRouter)
+app.use('/public', publicRouter)
+
 // API Key validation (required for all routes below)
 app.use(validateApiKey(true))
 
-// Routes
+// Protected routes (API key required)
 app.use('/preview', previewRouter)
 app.use('/fetch', fetchRouter)
 

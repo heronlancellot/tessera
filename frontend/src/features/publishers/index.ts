@@ -1,0 +1,1 @@
+export { PublishersNewPage } from "./PublishersNewPage"
