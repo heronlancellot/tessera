@@ -118,65 +118,65 @@ export async function POST(request: NextRequest) {
     // }
 
     // Generate a session for the user using a custom JWT
-    // const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-    //   type: "magiclink",
-    //   email: authUser.email!,
-    // })
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email: authUser.email!,
+    })
 
-    // if (sessionError) {
-    //   logger.error("Failed to generate link", sessionError)
-    // }
+    if (sessionError) {
+      logger.error("Failed to generate link", sessionError)
+    }
 
     // Extract token from the magic link URL to create a session
-    // let accessToken = null
-    // let refreshToken = null
+    let accessToken = null
+    let refreshToken = null
 
-    // if (sessionData?.properties?.hashed_token) {
-    //   // Verify the token to get a proper session
-    //   const { data: verifyData, error: verifyError } = await supabaseAdmin.auth.admin.getUserById(authUser.id)
+    if (sessionData?.properties?.hashed_token) {
+      // Verify the token to get a proper session
+      const { data: verifyData, error: verifyError } = await supabaseAdmin.auth.admin.getUserById(authUser.id)
 
-    //   if (!verifyError && verifyData) {
-    //     // Generate session tokens directly
-    //     const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-    //       email: authUser.email!,
-    //       password: normalizedAddress, // Use wallet address as password
-    //     }).catch(() => ({ data: { session: null }, error: { message: "Password not set" } }))
+      if (!verifyError && verifyData) {
+        // Generate session tokens directly
+        const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+          email: authUser.email!,
+          password: normalizedAddress, // Use wallet address as password
+        }).catch(() => ({ data: { session: null }, error: { message: "Password not set" } }))
 
-    //     if (session) {
-    //       accessToken = session.access_token
-    //       refreshToken = session.refresh_token
-    //     }
-    //   }
-    // }
+        if (session) {
+          accessToken = session.access_token
+          refreshToken = session.refresh_token
+        }
+      }
+    }
 
     // If we couldn't get a session via password, the user needs to set one
     // For now, we'll update the user to have a password based on wallet address
-    // if (!accessToken) {
-    //   // Set password for the user
-    //   await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
-    //     password: normalizedAddress,
-    //   })
+    if (!accessToken) {
+      // Set password for the user
+      await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+        password: normalizedAddress,
+      })
 
     //   // Now sign in with the password
-    //   const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-    //     email: authUser.email!,
-    //     password: normalizedAddress,
-    //   })
+      const { data: { session }, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+        email: authUser.email!,
+        password: normalizedAddress,
+      })
 
-    //   if (signInError) {
-    //     logger.error("Failed to sign in user", signInError)
-    //     return NextResponse.json({
-    //       user: publicUser,
-    //       authUser: {
-    //         id: authUser.id,
-    //         email: authUser.email,
-    //       },
-    //     })
-    //   }
+      if (signInError) {
+        logger.error("Failed to sign in user", signInError)
+        return NextResponse.json({
+          user: authUser,
+          authUser: {
+            id: authUser.id,
+            email: authUser.email,
+          },
+        })
+      }
 
-    //   accessToken = session?.access_token
-    //   refreshToken = session?.refresh_token
-    // }
+      accessToken = session?.access_token
+      refreshToken = session?.refresh_token
+    }
 
     return NextResponse.json({
       user: authUser,
