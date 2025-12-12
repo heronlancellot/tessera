@@ -1,5 +1,5 @@
 export const TesseraFeeSplitterFactory = {
-  address: "0x2FC2A3c1A2c0526d405f31076b66336597624Df3",
+  address: "0x49cCa62da01048b7b37F02e2fE4C61877784494f",
   abi: [
     {
         "inputs": [
