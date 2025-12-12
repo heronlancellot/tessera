@@ -9,6 +9,11 @@ import { avalancheFuji } from "thirdweb/chains"
 import { authService } from "@/shared/services/authService"
 import { logger } from "@/shared/utils/logger"
 import { toast } from "@/shared/utils/toast"
+import { motion } from "framer-motion"
+import { AnimatedBackground } from "@/features/landing/components/AnimatedBackground"
+import Image from "next/image"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -21,6 +26,11 @@ const wallets = [
   createWallet("me.rainbow"),
   createWallet("com.trustwallet.app"),
 ]
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+}
 
 export function LoginPage() {
   const account = useActiveAccount()
@@ -53,56 +63,100 @@ export function LoginPage() {
   }, [account, isAuthenticating, router])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#545454' }}>
-      <div className="text-center space-y-8 p-12">
-        {/* Logo Section */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="flex items-end gap-1">
-            <span
-              className="text-white font-serif italic leading-none"
-              style={{ fontFamily: '"Times New Roman", Times, serif', fontSize: '5rem', fontWeight: '400' }}
+    <div className="min-h-screen bg-[#141619]">
+      <AnimatedBackground />
+
+      {/* Header with back button - same spacing as LandingHeader */}
+      <header className="fixed top-0 left-0 right-0 z-50">
+        <div className="flex items-center justify-between pb-8">
+          <div className="pl-12 pt-8">
+            <Link
+              href="/"
+              className="group flex items-center gap-2 font-be-vietnam text-sm font-medium uppercase tracking-wide text-white transition-all hover:opacity-80"
             >
-              paper
-            </span>
-            <span
-              className="text-white font-bold leading-none"
-              style={{ fontFamily: 'var(--font-be-vietnam), sans-serif', fontSize: '5rem' }}
-            >
-              lab.
-            </span>
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              Back to Home
+            </Link>
           </div>
-          <img
-            src="/PaperLabLogo.png"
-            alt="PaperLab Mascot"
-            className="size-36 object-contain"
-          />
         </div>
+      </header>
 
-        {/* Subtitle */}
-        <div className="space-y-4 mb-8">
-          <p
-            className="text-white text-3xl font-semibold"
-            style={{ fontFamily: 'var(--font-be-vietnam), sans-serif' }}
+      {/* Main Content */}
+      <div className="relative flex min-h-screen flex-col items-center justify-center px-8">
+        <motion.div
+          className="text-center space-y-8"
+          initial="initial"
+          animate="animate"
+          transition={{ staggerChildren: 0.15 }}
+        >
+          {/* Logo Section */}
+          <motion.div
+            className="flex items-center justify-center gap-4 mb-12"
+            variants={fadeInUp}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            AI Agent Gateway
-          </p>
-          <p
-            className="text-white/70 text-lg"
-            style={{ fontFamily: 'var(--font-be-vietnam), sans-serif' }}
+            <div className="flex items-end gap-2">
+              <span className="font-besley text-[72px] italic leading-none text-white">
+                paper
+              </span>
+              <span className="font-be-vietnam text-[72px] font-extrabold leading-none text-white">
+                lab.
+              </span>
+            </div>
+            <Image
+              src="/PaperLabLogo.png"
+              alt="PaperLab Mascot"
+              width={144}
+              height={144}
+              unoptimized
+              className="object-contain"
+            />
+          </motion.div>
+
+          {/* Title & Subtitle */}
+          <motion.div
+            className="space-y-4"
+            variants={fadeInUp}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            Connect your wallet to access the dashboard
-          </p>
-        </div>
+            <h1 className="font-be-vietnam text-[48px] font-bold text-white">
+              AI Agent Gateway
+            </h1>
+            <p className="font-be-vietnam text-[18px] font-light text-white/80">
+              Connect your wallet to access the dashboard
+            </p>
+          </motion.div>
 
-        {/* Connect Button - apenas wallets Web3, sem login social */}
-        <div className="mt-8">
-          <ConnectButton 
-            client={client} 
-            chain={avalancheFuji}
-            wallets={wallets}
-          />
-        </div>
-
+          {/* Connect Button */}
+          <motion.div
+            className="mt-12"
+            variants={fadeInUp}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <motion.div
+              whileHover={{
+                scale: 1.05,
+                boxShadow: '0 0 30px rgba(210, 171, 103, 0.4), 0 0 60px rgba(75, 118, 121, 0.3)',
+              }}
+              whileTap={{ scale: 0.98 }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 17
+              }}
+              className="inline-block"
+              style={{
+                filter: 'drop-shadow(0 0 20px rgba(210, 171, 103, 0.2))',
+              }}
+            >
+              <ConnectButton
+                client={client}
+                chain={avalancheFuji}
+                wallets={wallets}
+              />
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   )
