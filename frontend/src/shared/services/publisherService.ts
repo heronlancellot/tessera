@@ -1,5 +1,6 @@
 import { supabase } from "@/shared/utils/supabase"
 import { Publisher } from "@/shared/types/publisher"
+import { env } from "@/shared/config/env"
 
 export const publisherService = {
   async getActivePublishers(): Promise<Publisher[]> {
@@ -43,6 +44,57 @@ export const publisherService = {
     })
 
     return counts
+  },
+
+  /**
+   * Get publisher by wallet address via Gateway API
+   * This uses the gateway instead of calling Supabase directly from the frontend
+   * Returns the publisher with contract_address for withdraw operations
+   */
+  async getPublisherByWalletAddress(walletAddress: string): Promise<Publisher | null> {
+    if (!walletAddress) {
+      console.error("Wallet address is required")
+      return null
+    }
+
+    try {
+      const normalizedAddress = walletAddress.toLowerCase()
+      // Note: publishers routes are under /public/publishers in the gateway
+      const url = `${env.gatewayUrl}/public/publishers/wallet/${encodeURIComponent(normalizedAddress)}`
+      
+      console.log("[publisherService] Fetching publisher from gateway:", url)
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      console.log("[publisherService] Response status:", response.status)
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          // Publisher not found - this is expected for users who aren't publishers
+          console.log("[publisherService] Publisher not found for wallet:", normalizedAddress)
+          return null
+        }
+        const errorData = await response.json().catch(() => ({}))
+        console.error("[publisherService] Error fetching publisher:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
+        return null
+      }
+
+      const data = await response.json()
+      console.log("[publisherService] Publisher found:", data.publisher?.id)
+      return data.publisher || null
+    } catch (error) {
+      console.error("[publisherService] Network error fetching publisher:", error)
+      return null
+    }
   },
 
   async createPublisher (publisher: Publisher): Promise<Publisher> {

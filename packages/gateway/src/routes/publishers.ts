@@ -123,6 +123,74 @@ publishersRouter.get('/', async (req: Request, res: Response) => {
 })
 
 /**
+ * GET /publishers/wallet/:walletAddress
+ * Get publisher by wallet address
+ * 
+ * Returns the publisher with contract_address for the given wallet address
+ * Used by frontend to get contract address for withdraw operations
+ */
+publishersRouter.get('/wallet/:walletAddress', async (req: Request, res: Response) => {
+  try {
+    const { walletAddress } = req.params
+
+    console.log('[GET /publishers/wallet/:walletAddress] Request received:', { 
+      walletAddress,
+      raw: walletAddress,
+      decoded: decodeURIComponent(walletAddress)
+    })
+
+    if (!walletAddress) {
+      return res.status(400).json({
+        error: 'Wallet address is required'
+      })
+    }
+
+    // Decode URL-encoded wallet address and normalize to lowercase
+    const decodedAddress = decodeURIComponent(walletAddress)
+    const normalizedAddress = decodedAddress.trim().toLowerCase()
+    
+    console.log('[GET /publishers/wallet/:walletAddress] Processing:', {
+      original: walletAddress,
+      decoded: decodedAddress,
+      normalized: normalizedAddress,
+      length: normalizedAddress.length,
+      startsWith0x: normalizedAddress.startsWith('0x')
+    })
+
+    if (!normalizedAddress.startsWith('0x')) {
+      return res.status(400).json({
+        error: 'Invalid wallet address format',
+        received: normalizedAddress
+      })
+    }
+
+    const publisher = await publisherService.findByWallet(normalizedAddress)
+
+    if (!publisher) {
+      console.log('[GET /publishers/wallet/:walletAddress] ❌ Publisher not found for:', normalizedAddress)
+      return res.status(404).json({
+        error: 'Publisher not found',
+        walletAddress: normalizedAddress
+      })
+    }
+
+    console.log('[GET /publishers/wallet/:walletAddress] ✅ Publisher found:', {
+      id: publisher.id,
+      name: publisher.name,
+      contract_address: publisher.contract_address
+    })
+
+    res.json({ publisher })
+  } catch (error: any) {
+    console.error('[GET /publishers/wallet/:walletAddress] Error:', error)
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error.message
+    })
+  }
+})
+
+/**
  * GET /publishers/:id
  * Get single publisher by ID
  */

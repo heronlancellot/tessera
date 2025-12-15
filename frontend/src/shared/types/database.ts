@@ -334,6 +334,27 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      upsert_wallet_user: {
+        Args: { auth_user_id: string; wallet_addr: string }
+        Returns: {
+          avatar_url: string | null
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          id: string
+          name: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+          user_id: string | null
+          wallet_address: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       validate_api_key: {
         Args: { p_key_hash: string }
         Returns: {

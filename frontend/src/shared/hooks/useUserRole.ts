@@ -27,19 +27,24 @@ export function useUserRole() {
 
         console.log("Checking role for wallet:", account.address)
 
-        // Query user by wallet address (case-insensitive comparison)
+        // Normalize wallet address to lowercase for consistent querying
+        const normalizedAddress = account.address.toLowerCase()
+
+        // Query user by wallet address (exact match, case-insensitive via normalization)
+        // Filter out soft-deleted users
         const { data, error: queryError } = await supabase
           .from("users")
           .select("role")
-          .ilike("wallet_address", account.address)
-          .single()
+          .eq("wallet_address", normalizedAddress)
+          .is("deleted_at", null)
+          .maybeSingle()
 
         if (queryError) {
           console.error("Error fetching user role:", queryError)
           setError(queryError.message)
           setRole(null)
         } else {
-          // The column name in the database is 'role', not 'user_role'
+          // Default to "user" role if user not found or role is null
           setRole(data?.role || "user")
         }
       } catch (err) {
