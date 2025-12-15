@@ -12,49 +12,87 @@ export interface EndpointInfo {
     id: string
     name: string
     slug: string
+    wallet_address: string | null
+    contract_address: string | null
   }
 }
 
 /**
- * Get endpoint info by hostname
+ * Get endpoint info by hostname and optional path (for slug matching)
  * Returns null if publisher not found (not integrated with Tessera)
+ * 
+ * Matching logic:
+ * - website must match hostname (with https://)
+ * - slug from path must match publisher slug
  */
 export async function getEndpointByHostname(
-  hostname: string
+  url: URL,
 ): Promise<EndpointInfo | null> {
-  // Normalize hostname (remove www., port, protocol)
-  const normalizedHost = hostname
-    .replace(/^www\./, '')
-    .replace(/:\d+$/, '') // Remove port
-    .toLowerCase()
+  const websiteUrl = url.origin
+  const fullUrlPath = url.pathname
 
-  console.log(`[getEndpointByHostname] Looking for publisher with hostname: ${normalizedHost}`)
-
-  // First, find publisher by slug or website
-  const { data: publishers, error: pubError } = await supabase
+  // STEP 1: Get all active publishers first
+  const { data: allActivePublishers, error: pubError } = await supabase
     .from('publishers')
-    .select('id, name, slug, website')
+    .select('id, name, slug, website, wallet_address, contract_address')
     .eq('is_active', true)
-    .or(`slug.eq.${normalizedHost},website.ilike.%${normalizedHost}%`)
-    .limit(1)
-    .maybeSingle()
 
-  if (pubError || !publishers) {
-    console.log(`[getEndpointByHostname] Publisher not found for hostname: ${normalizedHost}`)
-    if (pubError) console.log(`[getEndpointByHostname] Error:`, pubError)
+  if (pubError) {
+    console.error(`[getEndpointByHostname] Error fetching active publishers:`, pubError)
+    return null
+  }
 
-    // Check if publisher exists but is not active (for debugging)
-    const { data: inactivePublisher } = await supabase
-      .from('publishers')
-      .select('id, name, slug, website, status, is_active')
-      .or(`slug.eq.${normalizedHost},website.ilike.%${normalizedHost}%`)
-      .limit(1)
-      .maybeSingle()
+  if (!allActivePublishers || allActivePublishers.length === 0) {
+    console.log(`[getEndpointByHostname] No active publishers found`)
+    return null
+  }
 
-    if (inactivePublisher) {
-      console.log(`[getEndpointByHostname] Found INACTIVE publisher:`, inactivePublisher)
-      console.log(`[getEndpointByHostname] Publisher needs to be approved first!`)
+  console.log(' STEP 1 allActivePublishers', allActivePublishers)
+
+  // STEP 2: Compare website + /slug (from DB) with websiteUrl + /pathSlug (from URL)
+  const publishers = allActivePublishers.find((pub) => {
+    console.log(' STEP 2 pub', pub)
+    if (!pub.website || !pub.slug) return false
+
+    const databaseFullPathName = `${allActivePublishers[0].website + allActivePublishers[0].slug}`
+    if(`${pub.website}${pub.slug}` !== databaseFullPathName) {
+      console.log("STE 2.1 not matches", `${pub.website}${pub.slug}`, databaseFullPathName)
+      return false
     }
+
+    console.log("STE 2.2 matches", `${pub.website}${pub.slug}`, databaseFullPathName)
+    return true
+  })
+
+  if (!publishers) {
+
+    // Debug: Show all active publishers for comparison
+    console.log(`[getEndpointByHostname] Active publishers in DB:`, 
+      allActivePublishers.map(pub => {
+        let dbBase = pub.website
+        try {
+          const urlObj = new URL(pub.website)
+          dbBase = `${urlObj.protocol}//${urlObj.hostname.toLowerCase().replace(/^www\./, '')}`
+        } catch (e) {
+          // keep original
+        }
+        let dbSlug = pub.slug?.trim() || ''
+        if (dbSlug.startsWith('/')) {
+          dbSlug = dbSlug.slice(1)
+        }
+        const dbPath = `${dbBase}/${dbSlug}`
+        return {
+          name: pub.name,
+          website: pub.website,
+          websiteBase: dbBase,
+          slug: pub.slug,
+          slugNormalized: dbSlug,
+          dbFullPath: dbPath,
+          expected: fullUrlPath,
+          matches: dbPath === fullUrlPath
+        }
+      })
+    )
 
     return null
   }
@@ -85,7 +123,9 @@ export async function getEndpointByHostname(
     publisher: {
       id: publishers.id,
       name: publishers.name,
-      slug: publishers.slug
+      slug: publishers.slug,
+      wallet_address: publishers.wallet_address,
+      contract_address: publishers.contract_address
     }
   }
 }
@@ -95,6 +135,6 @@ export async function getEndpointByHostname(
  * Returns null if publisher not integrated
  */
 export async function getPrice(hostname: string): Promise<number | null> {
-  const endpoint = await getEndpointByHostname(hostname)
+  const endpoint = await getEndpointByHostname(new URL(hostname))
   return endpoint ? endpoint.price_usd : null
 }
