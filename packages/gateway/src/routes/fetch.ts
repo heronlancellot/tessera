@@ -78,12 +78,11 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
     }
 
     // Payment successful - fetch content from publisher's API
-    // Replace :id, :slug, :doi placeholders with extracted values from URL
-    const articleId = endpointInfo.path.split('/').filter(Boolean).pop() || 'default'
-    // Remove /tessera prefix if present in the path
-    const publisherApiUrl = endpointInfo.path.replace(':id', articleId)
-      .replace(':slug', articleId)
-      .replace(':doi', articleId)
+    // Use the endpoint path directly as configured in the database
+    const publisherApiUrl = endpointInfo.path
+
+    console.log(`[fetch] Request URL: ${url}`)
+    console.log(`[fetch] Calling publisher API: ${publisherApiUrl}`)
 
     // Call publisher's API with Tessera auth key
     const publisherResponse = await fetch(publisherApiUrl, {
