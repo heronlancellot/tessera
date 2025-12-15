@@ -11,9 +11,10 @@ import {
 
 interface BaseLayoutProps {
   children: ReactNode
+  title: string
 }
 
-export function BaseLayout({ children }: BaseLayoutProps) {
+export function BaseLayout({ children, title = "Tessera Dashboard" }: BaseLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
