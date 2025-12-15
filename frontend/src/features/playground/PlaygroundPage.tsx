@@ -228,7 +228,7 @@ export function PlaygroundPage() {
                 <Input
                   id="url"
                   type="url"
-                  placeholder="https://publisher.com/article/123"
+                  placeholder="https://tessera-publisher-server-117s-2e11s8xki.vercel.app/article"
                   value={url}
                   onChange={(e) => {
                     setUrl(e.target.value)
