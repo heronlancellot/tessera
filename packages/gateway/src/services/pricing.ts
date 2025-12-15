@@ -18,6 +18,30 @@ export interface EndpointInfo {
 }
 
 /**
+ * Normalize URL and path for consistent comparison
+ * Removes www., converts to lowercase, removes leading slashes from paths
+ */
+function normalizeUrl(websiteUrl: string, pathSlug: string): string {
+  let normalized = websiteUrl
+
+  try {
+    const urlObj = new URL(websiteUrl)
+    // Normalize: protocol + hostname (lowercase, remove www)
+    normalized = `${urlObj.protocol}//${urlObj.hostname.toLowerCase().replace(/^www\./, '')}`
+  } catch (e) {
+    // If invalid URL, keep original
+  }
+
+  // Normalize path/slug (remove leading slash)
+  let normalizedPath = pathSlug.trim()
+  if (normalizedPath.startsWith('/')) {
+    normalizedPath = normalizedPath.slice(1)
+  }
+
+  return `${normalized}/${normalizedPath}`
+}
+
+/**
  * Get endpoint info by hostname and optional path (for slug matching)
  * Returns null if publisher not found (not integrated with Tessera)
  * 
@@ -47,57 +71,34 @@ export async function getEndpointByHostname(
     return null
   }
 
-  console.log(' STEP 1 allActivePublishers', allActivePublishers)
-
   // STEP 2: Compare website + /slug (from DB) with websiteUrl + /pathSlug (from URL)
+  const requestFullPath = normalizeUrl(websiteUrl, fullUrlPath)
+
   const publishers = allActivePublishers.find((pub) => {
-    console.log(' STEP 2 pub', pub)
     if (!pub.website || !pub.slug) return false
 
-    const databaseFullPathName = `${allActivePublishers[0].website + allActivePublishers[0].slug}`
-    if(`${pub.website}${pub.slug}` !== databaseFullPathName) {
-      console.log("STE 2.1 not matches", `${pub.website}${pub.slug}`, databaseFullPathName)
-      return false
+    const dbFullPath = normalizeUrl(pub.website, pub.slug)
+    const matches = dbFullPath === requestFullPath
+
+    if (matches) {
+      console.log(`[getEndpointByHostname] ✅ Found matching publisher: ${pub.name}`)
+      console.log(`  DB path: ${dbFullPath}`)
+      console.log(`  Request: ${requestFullPath}`)
     }
 
-    console.log("STE 2.2 matches", `${pub.website}${pub.slug}`, databaseFullPathName)
-    return true
+    return matches
   })
 
   if (!publishers) {
-
-    // Debug: Show all active publishers for comparison
-    console.log(`[getEndpointByHostname] Active publishers in DB:`, 
-      allActivePublishers.map(pub => {
-        let dbBase = pub.website
-        try {
-          const urlObj = new URL(pub.website)
-          dbBase = `${urlObj.protocol}//${urlObj.hostname.toLowerCase().replace(/^www\./, '')}`
-        } catch (e) {
-          // keep original
-        }
-        let dbSlug = pub.slug?.trim() || ''
-        if (dbSlug.startsWith('/')) {
-          dbSlug = dbSlug.slice(1)
-        }
-        const dbPath = `${dbBase}/${dbSlug}`
-        return {
-          name: pub.name,
-          website: pub.website,
-          websiteBase: dbBase,
-          slug: pub.slug,
-          slugNormalized: dbSlug,
-          dbFullPath: dbPath,
-          expected: fullUrlPath,
-          matches: dbPath === fullUrlPath
-        }
-      })
-    )
+    console.warn(`[getEndpointByHostname] ❌ No matching publisher found for: ${requestFullPath}`)
+    console.log(`[getEndpointByHostname] Available publishers:\n  ${
+      allActivePublishers
+        .map(pub => `${pub.name}: ${normalizeUrl(pub.website, pub.slug || '')}`)
+        .join('\n  ')
+    }`)
 
     return null
   }
-
-  console.log(`[getEndpointByHostname] Found publisher:`, publishers)
 
   // Now get active endpoint for this publisher
   const { data: endpoint, error: endpointError } = await supabase
