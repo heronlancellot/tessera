@@ -101,6 +101,8 @@ export async function getEndpointByHostname(
   }
 
   // Now get active endpoint for this publisher
+  console.log(`[getEndpointByHostname] Buscando endpoint para publisher_id: ${publishers.id}`)
+
   const { data: endpoint, error: endpointError } = await supabase
     .from('endpoints')
     .select('id, path, price_usd')
@@ -108,6 +110,8 @@ export async function getEndpointByHostname(
     .eq('is_active', true)
     .limit(1)
     .maybeSingle()
+
+  console.log(`[getEndpointByHostname] Query result:`, { endpoint, error: endpointError })
 
   if (endpointError || !endpoint) {
     console.log(`[getEndpointByHostname] No active endpoint found for publisher ${publishers.name}`)
