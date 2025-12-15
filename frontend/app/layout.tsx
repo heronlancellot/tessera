@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import type { Metadata } from "next";
 import { ThirdwebProvider } from "thirdweb/react";
 import { Toaster } from "@/shared/components/shadcn/sonner";
 import { TOAST_CONFIG } from "@/shared/config/toast.config";

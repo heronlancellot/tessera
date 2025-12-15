@@ -1,15 +1,9 @@
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
+import { ComponentProps } from "react"
 import { usePathname } from "next/navigation"
 import { Sparkles } from "lucide-react"
-import { HomeIcon, type HomeIconHandle } from "@/shared/components/animated-icons/home"
-import { TerminalIcon, type TerminalIconHandle } from "@/shared/components/animated-icons/terminal"
-import { KeyIcon, type KeyIconHandle } from "@/shared/components/animated-icons/key"
-import { ActivityIcon, type ActivityIconHandle } from "@/shared/components/animated-icons/activity"
-import { SlidersHorizontalIcon, type SlidersHorizontalIconHandle } from "@/shared/components/animated-icons/sliders-horizontal"
-import { GlobeIcon, type GlobeIconHandle } from "@/shared/components/animated-icons/globe"
 import {
   Sidebar,
   SidebarContent,
@@ -23,86 +17,10 @@ import {
   SidebarSeparator,
 } from "@/shared/components/shadcn/sidebar"
 import { ThemeToggle } from "@/shared/components/ThemeToggle"
+import { mainNavItems, bottomNavItems, publishersNavItems } from "./constants"
+import { AnimatedMenuItem } from "./components/AnimatedMenuItem"
 
-const mainNavItems = [
-  {
-    title: "Overview",
-    url: "/dashboard",
-    icon: HomeIcon,
-  },
-  {
-    title: "Playground",
-    url: "/playground",
-    icon: TerminalIcon,
-  },
-]
-
-const bottomNavItems = [
-  {
-    title: "API Keys",
-    url: "/dashboard/api-keys",
-    icon: KeyIcon,
-  },
-  {
-    title: "Activity",
-    url: "/dashboard/activity",
-    icon: ActivityIcon,
-  },
-  // {
-  //   title: "Settings",
-  //   url: "/dashboard/settings",
-  //   icon: SlidersHorizontalIcon,
-  // },
-]
-
-const publishersNavItems = [
-  {
-    title: "Publishers",
-    url: "/publishers",
-    icon: GlobeIcon,
-  },
-]
-
-type IconHandle = HomeIconHandle | TerminalIconHandle | KeyIconHandle | ActivityIconHandle | SlidersHorizontalIconHandle | GlobeIconHandle
-
-function AnimatedMenuItem({
-  item,
-  isActive
-}: {
-  item: typeof mainNavItems[number] | typeof bottomNavItems[number] | typeof publishersNavItems[number]
-  isActive: boolean
-}) {
-  const iconRef = React.useRef<IconHandle>(null)
-
-  const handleMouseEnter = React.useCallback(() => {
-    iconRef.current?.startAnimation()
-  }, [])
-
-  const handleMouseLeave = React.useCallback(() => {
-    iconRef.current?.stopAnimation()
-  }, [])
-
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton
-        asChild
-        isActive={isActive}
-        className="data-[active=true]:bg-green-800 data-[active=true]:text-white data-[active=true]:hover:bg-green-700"
-      >
-        <Link
-          href={item.url}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <item.icon ref={iconRef} size={16} />
-          <span>{item.title}</span>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  )
-}
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
 
   return (

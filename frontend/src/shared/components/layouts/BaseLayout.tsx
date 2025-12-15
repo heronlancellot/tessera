@@ -1,5 +1,6 @@
 "use client"
 
+import { ReactNode } from "react"
 import { AppSidebar } from "@/widgets/sidebar/AppSidebar"
 import { WalletButton } from "@/shared/components/WalletButton"
 import { NetworkSelector } from "@/shared/components/NetworkSelector"
@@ -9,11 +10,10 @@ import {
 } from "@/shared/components/shadcn/sidebar"
 
 interface BaseLayoutProps {
-  children: React.ReactNode
-  title: string
+  children: ReactNode
 }
 
-export function BaseLayout({ children, title }: BaseLayoutProps) {
+export function BaseLayout({ children }: BaseLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
