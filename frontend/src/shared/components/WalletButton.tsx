@@ -11,12 +11,14 @@ import {
 } from "@/shared/components/shadcn/dropdown-menu"
 import { useState } from "react"
 import { dropdownVariants, buttonHoverVariants } from "@/shared/utils/animations"
+import { useRouter } from "next/navigation"
 
 export function WalletButton() {
   const account = useActiveAccount()
   const wallet = useActiveWallet()
   const { disconnect } = useDisconnect()
   const [open, setOpen] = useState(false)
+  const router = useRouter()
 
   if (!account) return null
 
@@ -25,6 +27,7 @@ export function WalletButton() {
   const handleDisconnect = () => {
     if (wallet) {
       disconnect(wallet)
+      router.push("/")
     }
   }
 
@@ -32,7 +35,7 @@ export function WalletButton() {
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <motion.button
-          className="flex items-center gap-2 h-9 px-3 bg-card border rounded-lg hover:bg-accent transition-colors"
+          className="flex items-center gap-2 h-9 px-3 bg-card border rounded-lg hover:bg-accent transition-colors cursor-pointer"
           whileHover="hover"
           whileTap="tap"
           variants={buttonHoverVariants}
@@ -49,6 +52,7 @@ export function WalletButton() {
               initial="hidden"
               animate="visible"
               exit="exit"
+              className="cursor-pointer"
             >
               <DropdownMenuItem
                 className="cursor-pointer"

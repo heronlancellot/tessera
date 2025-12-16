@@ -27,16 +27,19 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
 
   try {
     const parsedUrl = new URL(url)
+    console.log('parsedUrl', parsedUrl)
 
-    // Get endpoint info from Supabase
-    const endpointInfo = await getEndpointByHostname(parsedUrl.hostname)
+    // Get endpoint info from Supabase (pass hostname and pathname for slug matching)
+    const endpointInfo = await getEndpointByHostname(parsedUrl)
 
+    console.log('endpointInfo', endpointInfo)
     // Publisher not integrated with Tessera
     if (!endpointInfo) {
       res.status(404).json({
         error: 'Publisher not found',
-        message: `This publisher (${parsedUrl.hostname}) is not integrated with Tessera yet.`,
-        hostname: parsedUrl.hostname
+        message: `This publisher (${parsedUrl.hostname}) is not integrated with Tessera yet. The publisher may need to be approved and have an endpoint configured.`,
+        hostname: parsedUrl.hostname,
+        hint: 'Check if the publisher exists in the database and has an active endpoint configured.'
       })
       return
     }
@@ -56,11 +59,16 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
     const paymentData = req.headers['x-payment'] as string | null
     const resourceUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`
 
+    // Get publisher's wallet address for payment recipient
+    // If publisher has a wallet_address, use it; otherwise fallback to MERCHANT_WALLET_ADDRESS
+    const payTo = endpointInfo.publisher.contract_address
     // Settle payment using Thirdweb x402
+    // Payment goes to publisher's wallet if available, otherwise to merchant wallet
     const result = await settleX402Payment(
       paymentData,
       resourceUrl,
-      endpointInfo.price_usd
+      endpointInfo.price_usd,
+      payTo
     )
 
     // If not 200, return the payment required response
@@ -70,18 +78,16 @@ fetchRouter.get('/', async (req: Request, res: Response) => {
     }
 
     // Payment successful - fetch content from publisher's API
-    // Replace :id, :slug, :doi placeholders with extracted values from URL
-    const articleId = parsedUrl.pathname.split('/').filter(Boolean).pop() || 'default'
-    const publisherApiUrl = endpointInfo.path.replace(':id', articleId)
-      .replace(':slug', articleId)
-      .replace(':doi', articleId)
+    // Use the endpoint path directly as configured in the database
+    const publisherApiUrl = endpointInfo.path
 
-    console.log(`Fetching from publisher API: ${publisherApiUrl}`)
+    console.log(`[fetch] Request URL: ${url}`)
+    console.log(`[fetch] Calling publisher API: ${publisherApiUrl}`)
 
     // Call publisher's API with Tessera auth key
     const publisherResponse = await fetch(publisherApiUrl, {
       headers: {
-        'X-Tessera-Key': process.env.PUBLISHER_TESSERA_KEY || 'demo-tessera-key'
+        'X-Tessera-Key': process.env.PUBLISHER_TESSERA_KEY || 'demo-tessera-key-for-publisher-auth'
       }
     })
 

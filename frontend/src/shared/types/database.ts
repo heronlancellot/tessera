@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -136,33 +116,45 @@ export type Database = {
       }
       publishers: {
         Row: {
+          contract_address: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
           logo_url: string | null
           name: string
           slug: string
+          status: Database["public"]["Enums"]["publisher_status"] | null
+          submitted_at: string | null
           updated_at: string | null
+          wallet_address: string | null
           website: string | null
         }
         Insert: {
+          contract_address?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
           name: string
           slug: string
+          status?: Database["public"]["Enums"]["publisher_status"] | null
+          submitted_at?: string | null
           updated_at?: string | null
+          wallet_address?: string | null
           website?: string | null
         }
         Update: {
+          contract_address?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
           name?: string
           slug?: string
+          status?: Database["public"]["Enums"]["publisher_status"] | null
+          submitted_at?: string | null
           updated_at?: string | null
+          wallet_address?: string | null
           website?: string | null
         }
         Relationships: []
@@ -242,6 +234,7 @@ export type Database = {
           email: string | null
           id: string
           name: string | null
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
           user_id: string | null
           wallet_address: string
@@ -253,6 +246,7 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
           user_id?: string | null
           wallet_address: string
@@ -264,6 +258,7 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
           user_id?: string | null
           wallet_address?: string
@@ -327,6 +322,28 @@ export type Database = {
           email: string | null
           id: string
           name: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+          user_id: string | null
+          wallet_address: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      upsert_wallet_user: {
+        Args: { auth_user_id: string; wallet_addr: string }
+        Returns: {
+          avatar_url: string | null
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          id: string
+          name: string | null
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
           user_id: string | null
           wallet_address: string
@@ -350,8 +367,10 @@ export type Database = {
       }
     }
     Enums: {
+      publisher_status: "pending" | "approved" | "rejected"
       request_status: "pending" | "completed" | "failed"
       request_type: "preview" | "fetch"
+      user_role: "user" | "admin" | "publisher"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -477,14 +496,12 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
+      publisher_status: ["pending", "approved", "rejected"],
       request_status: ["pending", "completed", "failed"],
       request_type: ["preview", "fetch"],
+      user_role: ["user", "admin", "publisher"],
     },
   },
 } as const
-

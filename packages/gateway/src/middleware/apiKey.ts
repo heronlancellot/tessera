@@ -19,6 +19,14 @@ declare global {
   }
 }
 
+// Type for API key validation result from database function
+interface ApiKeyValidationResult {
+  is_valid: boolean
+  expires_at: string | null
+  user_id: string
+  api_key_id: string
+}
+
 /**
  * Hash API key using SHA-256 (same as frontend)
  */
@@ -35,6 +43,12 @@ function hashApiKey(apiKey: string): string {
 export function validateApiKey(required = false) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Allow OPTIONS requests (CORS preflight) to pass through
+      if (req.method === 'OPTIONS') {
+        next()
+        return
+      }
+
       // Extract API key from Authorization header
       const authHeader = req.headers['authorization']
 
@@ -78,7 +92,7 @@ export function validateApiKey(required = false) {
       // Validate API key using secure function
       const { data: validationResult, error } = await supabase
         .rpc('validate_api_key', { p_key_hash: keyHash })
-        .single()
+        .single() as { data: ApiKeyValidationResult | null; error: any }
 
       if (error || !validationResult) {
         res.status(401).json({

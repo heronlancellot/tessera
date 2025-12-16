@@ -1,9 +1,14 @@
 {
-  "name": "@tessera/sdk",
-  "version": "0.1.0",
+  "name": "@tessera-sdk/sdk",
+  "version": "0.1.1",
+  "description": "TypeScript SDK for AI agents to access paywalled content via x402 micropayments",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -13,7 +18,30 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "tsx test/test.ts"
+    "test": "tsx test/test.ts",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "tessera",
+    "sdk",
+    "x402",
+    "micropayments",
+    "paywall",
+    "content",
+    "blockchain",
+    "avalanche",
+    "usdc"
+  ],
+  "author": "Tessera Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heronlancellot/avax-hackathon-x402.git",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "thirdweb": "^5.112.4",
@@ -24,5 +52,8 @@
     "dotenv": "^16.6.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -9,6 +9,7 @@
   --popover-foreground: #0f1419;
   --primary: #01693e;
   --primary-foreground: #ffffff;
+  --teal: #4B7679;
   --secondary: #f0f2f5;
   --secondary-foreground: #0f1419;
   --muted: #f0f2f5;
@@ -36,6 +37,8 @@
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-be-vietnam: 'Be Vietnam Pro', sans-serif;
+  --font-besley: 'Besley', serif;
   --radius: 0.5rem;
   --shadow-x: 0px;
   --shadow-y: 4px;
@@ -64,6 +67,7 @@
   --popover-foreground: #e7e9ea;
   --primary: #01693e;
   --primary-foreground: #ffffff;
+  --teal: #4B7679;
   --secondary: #202327;
   --secondary-foreground: #e7e9ea;
   --muted: #202327;
@@ -91,6 +95,8 @@
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-be-vietnam: 'Be Vietnam Pro', sans-serif;
+  --font-besley: 'Besley', serif;
   --radius: 0.5rem;
   --shadow-x: 0px;
   --shadow-y: 4px;
@@ -133,6 +139,7 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-teal: var(--teal);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -145,6 +152,8 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
+  --font-be-vietnam: var(--font-be-vietnam);
+  --font-besley: var(--font-besley);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

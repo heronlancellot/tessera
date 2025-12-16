@@ -51,17 +51,30 @@ export interface SettleResult {
 /**
  * Settle a payment using Thirdweb x402
  * Returns the settlement result with status
+ * 
+ * @param paymentData - The x402 payment data from client
+ * @param resourceUrl - The URL of the resource being accessed
+ * @param priceUsd - The price in USD
+ * @param payTo - Optional wallet address to receive payment. If not provided, uses MERCHANT_WALLET_ADDRESS
  */
 export async function settleX402Payment(
   paymentData: string | null,
   resourceUrl: string,
-  priceUsd: number
+  priceUsd: number,
+  payTo?: string | null
 ): Promise<SettleResult> {
+  // Use publisher's wallet address if provided, otherwise fallback to merchant wallet
+  const recipientAddress = payTo || process.env.MERCHANT_WALLET_ADDRESS!
+
+  if (!recipientAddress) {
+    throw new Error('No payment recipient address available. Set MERCHANT_WALLET_ADDRESS or provide payTo parameter.')
+  }
+  
   const result = await settlePayment({
     resourceUrl,
     method: 'GET',
     paymentData,
-    payTo: process.env.MERCHANT_WALLET_ADDRESS!,
+    payTo: recipientAddress,
     network: avalancheFuji,
     price: {
       amount: usdToUsdc(priceUsd).toString(),

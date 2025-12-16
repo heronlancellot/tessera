@@ -5,16 +5,16 @@ TypeScript SDK for AI agents to access paywalled content via x402 micropayments.
 ## Installation
 
 ```bash
-pnpm add @tessera/sdk
+pnpm add @tessera-sdk/sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { TesseraClient } from '@tessera/sdk'
+import { Tessera } from '@tessera-sdk/sdk'
 
-const client = new TesseraClient({
-  gatewayUrl: 'http://localhost:3001',
+const client = new Tessera({
+  baseUrl: 'http://localhost:3001',
   privateKey: process.env.AGENT_PRIVATE_KEY  // Wallet with USDC
 })
 
@@ -29,13 +29,13 @@ console.log(content.markdown)
 
 ## API
 
-### `new TesseraClient(config)`
+### `new Tessera(config)`
 
 ```typescript
-const client = new TesseraClient({
-  gatewayUrl: string,      // Gateway URL
+const client = new Tessera({
+  baseUrl: string,         // Gateway URL
   privateKey: string,      // Wallet private key (0x...)
-  apiKey?: string          // (future)
+  apiKey?: string          // Optional API key
 })
 ```
 

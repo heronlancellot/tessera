@@ -10,7 +10,7 @@ export interface AnimatedIconHandle {
   stopAnimation: () => void;
 }
 
-interface AnimatedIconProps extends HTMLAttributes<HTMLDivElement> {
+interface AnimatedIconProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   size?: number;
   children: (controls: ReturnType<typeof useAnimation>) => React.ReactNode;
 }

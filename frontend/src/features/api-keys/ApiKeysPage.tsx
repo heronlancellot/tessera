@@ -16,13 +16,16 @@ import { ApiKeysTable } from "./components/ApiKeysTable"
 import { ApiKeyForm } from "./components/ApiKeyForm"
 import { NewKeyModal } from "./components/NewKeyModal"
 import { useApiKeys } from "./hooks/useApiKeys"
+import { toast} from "sonner"
 
 export function ApiKeysPage() {
   const account = useActiveAccount()
+  console.log("account22", account)
+  if (!account) return toast.error("No account found")
 
   // API Keys data & operations
   const { apiKeys, isLoading, createKey, deleteKey, hideFullToken } = useApiKeys({
-    walletAddress: account?.address,
+    walletAddress: account.address,
   })
 
   // Local UI state
@@ -63,7 +66,7 @@ export function ApiKeysPage() {
 
   const handleSubmit = async () => {
     if (!keyName.trim()) return
-
+    toast.info("Creating API key...")
     setIsSubmitting(true)
     try {
       const newKey = await createKey(keyName, keyExpiration)
@@ -76,9 +79,11 @@ export function ApiKeysPage() {
           token: newKey.token,
         })
         setShowNewKeyModal(true)
+        toast.success("API key created successfully")
       }
     } finally {
       setIsSubmitting(false)
+      toast.dismiss()
     }
   }
 

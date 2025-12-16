@@ -5,6 +5,7 @@ import { X, Copy, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useActiveAccount } from "thirdweb/react"
 import { useApiKeys } from "@/features/api-keys/hooks/useApiKeys"
+import { env } from "@/shared/config/env"
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/shadcn/select"
+import { toast } from "sonner"
 
 interface SDKDrawerProps {
   isOpen: boolean
@@ -24,12 +26,12 @@ const LANGUAGES = [
 ]
 
 const getCodeSnippet = (language: string, apiKey: string) => {
-  const jsSnippet = `import { Tessera } from '@tessera/sdk'
+  const jsSnippet = `import { Tessera } from '@tessera-sdk/sdk'
 
 // Initialize SDK
 const tessera = new Tessera({
   privateKey: process.env.AGENT_PRIVATE_KEY,
-  baseUrl: 'https://gateway.tessera.dev',
+  baseUrl: '${env.gatewayUrl}',
   apiKey: '${apiKey}'
 })
 
@@ -42,11 +44,11 @@ const content = await tessera.fetch('https://example.com/article')
 console.log(content.markdown)`
 
   const curlSnippet = `# Preview content (free)
-curl "https://gateway.tessera.dev/preview?url=https://example.com/article" \\
+curl "${env.gatewayUrl}/preview?url=https://example.com/article" \\
   -H "Authorization: Bearer ${apiKey}"
 
 # Fetch full content (requires payment)
-curl "https://gateway.tessera.dev/fetch?url=https://example.com/article" \\
+curl "${env.gatewayUrl}/fetch?url=https://example.com/article" \\
   -H "Authorization: Bearer ${apiKey}"`
 
   const snippets: Record<string, string> = {
@@ -59,7 +61,8 @@ curl "https://gateway.tessera.dev/fetch?url=https://example.com/article" \\
 
 export function SDKDrawer({ isOpen, onClose }: SDKDrawerProps) {
   const account = useActiveAccount()
-  const { apiKeys, isLoading } = useApiKeys({ walletAddress: account?.address })
+  if (!account) return toast.error("No account found")
+  const { apiKeys, isLoading } = useApiKeys({ walletAddress: account.address })
   const [selectedApiKeyId, setSelectedApiKeyId] = useState<string>("")
   const [selectedLanguage, setSelectedLanguage] = useState("js")
   const [copied, setCopied] = useState(false)
